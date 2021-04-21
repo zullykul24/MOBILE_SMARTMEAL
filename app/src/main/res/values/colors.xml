@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="colorPrimary">#e60000</color>
+    <color name="colorPrimaryDark">#e60000</color>
+    <color name="colorAccent">#e60000</color>
+    <color name="colorEmptyTable">#4EC33A</color>
+    <color name="colorFilledTable">#c92c1e</color>
+    <color name="colorBookedTable">#e6e61c</color>
+</resources>

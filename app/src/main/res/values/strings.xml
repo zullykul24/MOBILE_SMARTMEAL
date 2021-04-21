@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Smart Meal</string>
+    <string-array name="account_type">
+        <item>Quản lý</item>
+        <item>Thu ngân</item>
+        <item>Nhà bếp</item>
+        <item>Bồi bàn</item>
+    </string-array>
+</resources>
