@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="#fff"
+
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:textSize="40sp"
+        android:fontFamily="@font/sriracha"
+        android:background="@color/colorAccent"
+        android:textColor="#fff"
+        android:padding="5dp"
+        android:id="@+id/textViewTableTitle"
+        android:text="Danh sách bàn"
+        android:layout_alignParentTop="true"
+
+
+        android:gravity="center"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:id="@+id/table_type"
+        android:weightSum="3"
+        android:layout_width="match_parent"
+        android:layout_below="@id/textViewTableTitle"
+        android:layout_height="50dp">
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:layout_width="20dp"
+                android:background="@color/colorEmptyTable"
+                android:id="@+id/empty_table_color"
+                android:layout_centerVertical="true"
+                android:layout_height="20dp"></RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="Bàn trống"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/empty_table_color"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_height="match_parent"></TextView>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:layout_width="20dp"
+                android:background="@color/colorFilledTable"
+                android:id="@+id/filled_table_color"
+                android:layout_centerVertical="true"
+                android:layout_height="20dp"></RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="Có khách"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/filled_table_color"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_height="match_parent"></TextView>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:paddingLeft="20dp"
+            android:layout_weight="1">
+            <RelativeLayout
+                android:layout_width="20dp"
+                android:background="@color/colorBookedTable"
+                android:id="@+id/booked_table_color"
+                android:layout_centerVertical="true"
+                android:layout_height="20dp"></RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="Đặt trước"
+                android:textSize="13sp"
+                android:layout_toRightOf="@id/booked_table_color"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:layout_marginLeft="20dp"
+                android:layout_height="match_parent"></TextView>
+        </RelativeLayout>
+
+    </LinearLayout>
+    <GridView
+
+        android:verticalSpacing="25dp"
+        android:paddingTop="20dp"
+
+        android:padding="10dp"
+        tools:listitem="@layout/table_item"
+        android:numColumns="4"
+
+        android:id="@+id/gridViewTable"
+        android:layout_width="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_height="0dp"
+        android:layout_below="@id/table_type"
+        android:layout_marginTop="5dp"/>
+
+</RelativeLayout>

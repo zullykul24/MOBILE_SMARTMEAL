@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
+    >
+
+    <ImageView
+        android:padding="10dp"
+        android:id="@+id/imageViewMenuFoodItem"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="0dp"
+        android:scaleType="fitXY"
+
+
+        />
+
+    <TextView
+        android:id="@+id/textViewNameMenuFoodItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine|textNoSuggestions"
+
+        android:textStyle="bold"
+        android:singleLine="false"
+        android:layout_marginTop="15dp"
+        android:gravity="left"
+        android:scrollHorizontally="false"
+        android:minLines="2"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/imageViewMenuFoodItem"
+        android:text="Name"
+        android:textSize="20sp"
+        />
+
+    <TextView
+        android:id="@+id/textViewPriceMenuFoodItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="15dp"
+        android:textStyle="bold"
+        android:layout_toRightOf="@+id/imageViewMenuFoodItem"
+
+        android:text="Price"
+        android:textSize="15sp"
+        />
+
+
+
+</RelativeLayout>

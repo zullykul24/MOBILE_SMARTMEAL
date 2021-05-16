@@ -21,7 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.myapplication.Account;
+import com.example.myapplication.models.Account;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.LoginActivity;
 import com.example.myapplication.api.ApiClient;
@@ -87,7 +87,7 @@ public class FragmentSignUp extends Fragment {
         acc_type = (Spinner) view.findViewById(R.id.account_type);
 
         ///Các type account tại file strings.xml
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.spinner_item , getResources().getStringArray(R.array.account_type));
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.item_spinner, getResources().getStringArray(R.array.account_type));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 

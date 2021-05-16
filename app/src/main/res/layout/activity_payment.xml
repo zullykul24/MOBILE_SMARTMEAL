@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <RelativeLayout
+        android:background="@color/colorAccent"
+        android:id="@+id/payment_header"
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+        <TextView
+            android:id="@+id/text_thanh_toan"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="#fff"
+            android:fontFamily="@font/sriracha"
+            android:text="Thanh toán"
+            android:gravity="center"
+            android:textSize="40sp"></TextView>
+        <ImageButton
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            android:id="@+id/payment_backtohome_btn"
+            android:layout_marginLeft="20dp"
+
+            android:background="@color/colorAccent"
+            android:src="@drawable/white_arr2"></ImageButton>
+    </RelativeLayout>
+    <ListView
+        android:id="@+id/list_payment_item"
+        android:layout_width="match_parent"
+
+        android:divider="@null"
+        android:layout_height="wrap_content"
+        tools:listitem="@layout/item_payment"
+        android:layout_marginTop="40dp"
+        android:layout_below="@id/payment_header"></ListView>
+</RelativeLayout>

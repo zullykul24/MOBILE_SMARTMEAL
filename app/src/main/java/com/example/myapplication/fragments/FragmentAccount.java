@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.example.myapplication.Account;
+import com.example.myapplication.models.Account;
 import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.LoginActivity;
@@ -44,8 +44,6 @@ public class FragmentAccount extends Fragment {
             case 4:
                 accountType = "Phục vụ bàn";
                 break;
-            default:
-                accountType = "Phục vụ bàn";
         }
 
 

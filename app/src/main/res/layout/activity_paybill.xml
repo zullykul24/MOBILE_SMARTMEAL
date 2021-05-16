@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+
+    <TextView
+        android:id="@+id/text_paybill_table"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:layout_alignParentTop="true"
+
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:text="Bàn số 1"
+        android:textColor="#fff"
+        android:fontFamily="@font/sriracha"
+        android:textSize="40sp"></TextView>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_below="@id/text_paybill_table"
+        android:id="@+id/pay_bill_content"
+        android:padding="15dp"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/employee_panel"
+
+            android:layout_alignParentTop="true"
+            android:layout_height="wrap_content">
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:textSize="20sp"
+                android:id="@+id/employee_name"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Tên nhân viên:">
+
+            </TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhân viên số một"
+                android:id="@+id/idNhanVien"
+                android:layout_toRightOf="@id/employee_name"
+
+                android:textSize="20sp"
+                ></TextView>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/bill_number_panel"
+
+            android:layout_below="@id/employee_panel"
+            android:layout_height="wrap_content">
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:textSize="20sp"
+                android:id="@+id/text_bill_num"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Số hoá đơn:">
+
+            </TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="012345"
+                android:id="@+id/paymentId"
+                android:layout_toRightOf="@id/text_bill_num"
+
+                android:textSize="20sp"
+                ></TextView>
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:id="@+id/bill_date_panel"
+
+            android:layout_below="@id/bill_number_panel"
+            android:layout_height="wrap_content">
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:textSize="20sp"
+                android:id="@+id/text_bill_date"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Ngày:">
+
+            </TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2020-20-02"
+                android:id="@+id/date_paymented"
+                android:layout_toRightOf="@id/text_bill_date"
+
+                android:textSize="20sp"
+                ></TextView>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_marginTop="30dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:weightSum="12"
+            android:layout_below="@id/bill_date_panel"
+            android:id="@+id/head_table_bill"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:textStyle="bold"
+                android:text="STT"
+                android:background="@drawable/table_cell"
+                android:textSize="16sp"
+                android:layout_height="wrap_content"></TextView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="5"
+                android:text="Tên món"
+                android:textStyle="bold"
+                android:textAlignment="center"
+                android:background="@drawable/table_cell"
+                android:textSize="16sp"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"></TextView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textStyle="bold"
+                android:text="SL"
+                android:background="@drawable/table_cell"
+                android:textSize="16sp"
+                android:layout_height="wrap_content"></TextView>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="2"
+                android:background="@drawable/table_cell"
+                android:text="Giá"
+                android:paddingLeft="5dp"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_height="wrap_content"></TextView>
+            <TextView
+                android:layout_width="0dp"
+                android:background="@drawable/table_cell"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:text="Tổng"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_height="wrap_content"></TextView>
+        </LinearLayout>
+        <ListView
+            android:layout_below="@id/head_table_bill"
+            android:layout_width="match_parent"
+
+            android:id="@+id/listview_pay_bill"
+            tools:listitem="@layout/item_paybill"
+            android:layout_height="wrap_content"></ListView>
+
+
+
+        <RelativeLayout
+        android:id="@+id/total_commited"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/listview_pay_bill"
+        android:layout_marginTop="13dp">
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:text="Tổng hoá đơn:"
+            android:textSize="20sp"></TextView>
+
+        <TextView
+            android:id="@+id/total_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_toRightOf="@id/text2"
+            android:text="1000000"
+            android:textSize="20sp"></TextView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@id/total_price"
+            android:text="đồng"
+            android:textSize="20sp"></TextView>
+
+    </RelativeLayout>
+
+
+
+
+        <Button
+            android:id="@+id/btn_thanh_toan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/total_commited"
+            android:layout_marginTop="15dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/them_mon_btn"
+            android:paddingHorizontal="10dp"
+            android:text="Thanh toán"
+            android:textColor="#fff"
+            android:textSize="15dp"></Button>
+
+
+
+    </RelativeLayout>
+</RelativeLayout>

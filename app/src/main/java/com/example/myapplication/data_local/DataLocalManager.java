@@ -2,7 +2,7 @@ package com.example.myapplication.data_local;
 
 import android.content.Context;
 
-import com.example.myapplication.Account;
+import com.example.myapplication.models.Account;
 import com.google.gson.Gson;
 
 

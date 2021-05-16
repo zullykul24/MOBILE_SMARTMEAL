@@ -7,11 +7,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <FrameLayout
-        android:id="@+id/cashier_fragment_container"
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
-        android:layout_above="@+id/cashier_navbar"
+        android:layout_above="@+id/navbar"
         >
 
     </FrameLayout>
@@ -22,7 +22,7 @@
         app:labelVisibilityMode="labeled"
 
 
-        android:id="@+id/cashier_navbar"
+        android:id="@+id/navbar"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         app:menu="@menu/bottom_nav_menu" />

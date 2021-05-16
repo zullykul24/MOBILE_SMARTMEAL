@@ -3,8 +3,6 @@ package com.example.myapplication.data_local;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.myapplication.Account;
-
 public class MySharedPreferences {
     private static String TAG = MySharedPreferences.class.getName();
     Context context;
