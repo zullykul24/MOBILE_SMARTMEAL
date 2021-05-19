@@ -1,6 +1,8 @@
 package com.example.myapplication.adapters;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,7 +92,7 @@ public class MenuFoodItemAdapter extends BaseAdapter implements Filterable {
                         data = VNCharacterUtils.removeAccent(data);
                         //  if (data.toLowerCase().startsWith(constraint.toString())) {
                         if (data.toLowerCase().contains(VNCharacterUtils.removeAccent(constraint.toString()))) {
-                            FilteredArrList.add(new MenuFoodItem(originalList.get(i).getDishId(), originalList.get(i).getDishName(),originalList.get(i).getPrice(), originalList.get(i).getDishTypeId(), originalList.get(i).getImage()));
+                            FilteredArrList.add(new MenuFoodItem(originalList.get(i).getDishName(),originalList.get(i).getPrice(), originalList.get(i).getDishTypeId(), originalList.get(i).getImage()));
                         }
                     }
                     // set the Filtered result to return
@@ -131,7 +133,6 @@ public class MenuFoodItemAdapter extends BaseAdapter implements Filterable {
         String priceString = String.valueOf(df.format(menu.getPrice()));
         holder.price.setText(priceString+"đ");
         String imgUrl = menu.getImage();
-
         Picasso.with(context).load(imgUrl).into(holder.image);
         return convertView;
     }

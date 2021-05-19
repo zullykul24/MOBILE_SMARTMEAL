@@ -13,6 +13,8 @@ import com.example.myapplication.adapters.MenuFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.MenuFoodItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ public class NewFood extends AppCompatActivity {
     ArrayList<MenuFoodItem> arrayNewFood;
     private List<MenuFoodItem> responseList;
     MenuFoodItemAdapter menuFoodItemAdapter;
+    HubConnection hubConnection;
+    private MenuFoodItem receivedItem;
 
     long millis = System.currentTimeMillis();
     java.sql.Date date = new java.sql.Date(millis);
@@ -43,6 +47,14 @@ public class NewFood extends AppCompatActivity {
             }
         });
         arrayNewFood = new ArrayList<>();
+        ////
+        ///
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
+
+            hubConnection.start();
+
+
+
         /// add món vào list này nè
         ///
         //////chỗ này lấy ảnh test thôi
@@ -53,7 +65,7 @@ public class NewFood extends AppCompatActivity {
                 responseList = (ArrayList<MenuFoodItem>) response.body();
                 for (MenuFoodItem i:responseList){
                     /// thêm tất cả các món từ response vào menuItemArrayList
-                    arrayNewFood.add(0,new MenuFoodItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                    arrayNewFood.add(0,new MenuFoodItem( i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
                 }
                 Log.e("Get list dishes status:", "Success");
                 menuFoodItemAdapter.notifyDataSetChanged();
@@ -75,5 +87,17 @@ public class NewFood extends AppCompatActivity {
 
         menuFoodItemAdapter = new MenuFoodItemAdapter(NewFood.this, R.layout.item_menu_food, arrayNewFood);
         listview.setAdapter(menuFoodItemAdapter);
+        hubConnection.on("ReceiveNewFood", (foodName, foodPrice, dishType) ->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    receivedItem = new MenuFoodItem(foodName,foodPrice, dishType, ApiClient.BASE_URL);
+                    arrayNewFood.add(0, receivedItem);
+                    menuFoodItemAdapter.notifyDataSetChanged();
+                }
+            });
+
+            Log.e("ReceiveNewFoodmsg",foodName + foodPrice+""+ dishType+"");
+        }, String.class, Integer.class, Integer.class);
     }
 }

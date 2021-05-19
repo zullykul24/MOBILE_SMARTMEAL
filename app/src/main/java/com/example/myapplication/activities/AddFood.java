@@ -25,14 +25,14 @@ import com.example.myapplication.R;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.MenuFoodItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,12 +50,15 @@ public class AddFood extends AppCompatActivity {
     RadioButton type_food, type_drink;
     RadioGroup radioGroup;
     private MenuFoodItem item;
+    HubConnection hubConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_food);
         AnhXa();
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
+        Log.e("hub: ",hubConnection.toString());
         // bat cam
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,24 +124,29 @@ public class AddFood extends AppCompatActivity {
         {
             String foodName = name.getText().toString().trim();
             String foodPrice = price.getText().toString().trim();
-           // String foodImage = Base64.getEncoder().encodeToString(hinhanh);
-            String foodImage = Base64.encodeToString(hinhanh,0);
-            item = new MenuFoodItem(foodName, Integer.parseInt(foodPrice), dishType, foodImage);
+            String foodBase64Image = Base64.encodeToString(hinhanh,0);
+            item = new MenuFoodItem(0,foodName, Integer.parseInt(foodPrice), dishType, foodBase64Image);
 
 
             ApiClient.getApiClient().create(ApiInterface.class).addNewFood(item).enqueue(new Callback<ResponseBody>() {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     Log.e("Add food response", response+"");
-                   Log.e("response body: ", response.body()+"");
-                   Log.e("item", item.toString());
+
+
                     if(response.code() == 200) {
                         Toast.makeText(AddFood.this, "Món đã được thêm", Toast.LENGTH_SHORT).show();
-                      //  finish();
+                        if (hubConnection == null || hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED) {
+                            hubConnection.start().blockingAwait();
+
+                        }
+                        Log.e("status", hubConnection.getConnectionState()+"");
+                        hubConnection.send("SendNewFood", foodName, Integer.parseInt(foodPrice), dishType);
+                        finish();
                     }
                     else {
-                        Toast.makeText(AddFood.this, "Món chưa được thêm", Toast.LENGTH_SHORT).show();
-                       // finish();
+                        Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 }
 
@@ -146,7 +154,7 @@ public class AddFood extends AppCompatActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Log.e("Add food failed", t+"");
                     Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
-                   // finish();
+                    finish();
 
                 }
             });

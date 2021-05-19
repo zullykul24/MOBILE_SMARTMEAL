@@ -8,7 +8,7 @@ public class FoodOrderItem implements Serializable {
     private String note;
 
     public FoodOrderItem(int dish_id, String dish_name, int price, int dishType_id, String imageUrl) {
-        item = new MenuFoodItem(dish_id, dish_name, price, dishType_id, imageUrl);
+        item = new MenuFoodItem(dish_name, price, dishType_id, imageUrl);
         this.number = 1;
     }
 

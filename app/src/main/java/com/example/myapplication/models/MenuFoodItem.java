@@ -10,6 +10,31 @@ public class MenuFoodItem implements Serializable {
     private String image;
     private String base64ImageString;
 
+    @Override
+    public String toString() {
+        return "MenuFoodItem{" +
+                "dishName='" + dishName + '\'' +
+                ", dishTypeId=" + dishTypeId +
+                ", price=" + price +
+                ", image='" + image + '\'' +
+                '}';
+    }
+
+    public MenuFoodItem(String dishName, int price, int dishTypeId, String image){
+
+        this.dishName = dishName;
+        this.price = price;
+        this.image = image;
+        this.dishTypeId = dishTypeId;
+    }
+    public MenuFoodItem(int dishId, String dishName, int price, int dishTypeId, String base64ImageString){
+        this.dishId = dishId;
+        this.dishName = dishName;
+        this.price = price;
+        this.dishTypeId = dishTypeId;
+        this.base64ImageString = base64ImageString;
+    }
+
     public String getBase64ImageString() {
         return base64ImageString;
     }
@@ -17,26 +42,6 @@ public class MenuFoodItem implements Serializable {
     public void setBase64ImageString(String base64ImageString) {
         this.base64ImageString = base64ImageString;
     }
-
-
-
-    public MenuFoodItem(int dishId,String dishName, int price, int dishTypeId, String image){
-        this.dishId = dishId;
-        this.dishName = dishName;
-        this.price = price;
-        this.image = image;
-        this.dishTypeId = dishTypeId;
-    }
-    public MenuFoodItem(String dishName, int price, int dishTypeId, String base64ImageString){
-        this.dishName = dishName;
-        this.price = price;
-        this.dishTypeId = dishTypeId;
-        this.base64ImageString = base64ImageString;
-    }
-
-
-
-
 
     public int getDishId() {
         return dishId;
@@ -78,13 +83,5 @@ public class MenuFoodItem implements Serializable {
         this.image = image;
     }
 
-    @Override
-    public String toString() {
-        return "MenuFoodItem{" +
-                "dishName='" + dishName + '\'' +
-                ", dishTypeId=" + dishTypeId +
-                ", price=" + price +
-                ", base64ImageString='" + base64ImageString + '\'' +
-                '}';
-    }
+
 }

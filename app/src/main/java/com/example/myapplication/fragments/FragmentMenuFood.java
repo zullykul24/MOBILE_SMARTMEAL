@@ -55,7 +55,7 @@ public class FragmentMenuFood extends Fragment {
                 responseList = (ArrayList<MenuFoodItem>) response.body();
                 for (MenuFoodItem i:responseList){
                     /// thêm tất cả các món từ response vào menuItemArrayList
-                    menuItemArrayList.add(new MenuFoodItem(i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                    menuItemArrayList.add(new MenuFoodItem(i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
                 }
                 Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
                 Log.e("Get list dishes status:", "Success");
