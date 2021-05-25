@@ -6,50 +6,31 @@ import java.io.Serializable;
 
 public class TableItem implements Serializable {
     private String name;
-    private String status;
+    private int status;
+    // empty:0
+    // booked:-1
+    //filled:1
     private String color;
     private int image;
-    private  int chair_number;
     private  int id;
-
-    public TableItem(int id, String name,int chair_number, String status) {
-        this.id= id;
-        this.name = name;
-        this.status = status;
-        this.image = R.drawable.table_icon;
-        this.color = "#4EC33A";
-        this.chair_number= chair_number;
-    }
-
     public int getId() {
         return id;
     }
-
     public void setId(int id) {
         this.id = id;
     }
-
-    public TableItem(String name, String status){
-        this.name = name;
+    public TableItem(int id){
+        this.id = id;
+        this.status = 0;
+        this.image = R.drawable.table_icon;
+        this.color = "#4EC33A";
+    }
+    public TableItem(int id, int status){
+        this.id = id;
         this.status = status;
         this.image = R.drawable.table_icon;
         this.color = "#4EC33A";
     }
-    public TableItem(String name){
-        this.name = name;
-        this.status = "Empty";
-        this.image = R.drawable.table_icon;
-        this.color = "#4EC33A";
-    }
-
-    public int getChair_number() {
-        return chair_number;
-    }
-
-    public void setChair_number(int chair_number) {
-        this.chair_number = chair_number;
-    }
-
     public String getName() {
         return name;
     }
@@ -58,11 +39,11 @@ public class TableItem implements Serializable {
         this.name = name;
     }
 
-    public String getStatus() {
+    public int getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

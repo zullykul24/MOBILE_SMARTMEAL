@@ -19,6 +19,8 @@ import com.example.myapplication.adapters.MenuFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.MenuFoodItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +39,8 @@ public class FragmentMenuFood extends Fragment {
     private List<MenuFoodItem> responseList;
     EditText searchText;
     ListView  listViewFood;
+    HubConnection hubConnection;
+    private MenuFoodItem receivedItem;
 
     @Nullable
     @Override
@@ -47,6 +51,9 @@ public class FragmentMenuFood extends Fragment {
 
         listViewFood = (ListView)rootView.findViewById(R.id.listViewFoodMenu);
         menuItemArrayList = new ArrayList<>();
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
+
+        hubConnection.start();
         //call api get list of dishes
         //
         ApiClient.getApiClient().create(ApiInterface.class).getListDishes().enqueue(new Callback<List<MenuFoodItem>>() {
@@ -96,6 +103,19 @@ public class FragmentMenuFood extends Fragment {
             }
         });
         menuFoodItemAdapter.notifyDataSetChanged();
+        hubConnection.on("ReceiveNewFood", (foodName, foodPrice, dishType) ->{
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    receivedItem = new MenuFoodItem(foodName,foodPrice, dishType, ApiClient.BASE_URL);
+                    menuItemArrayList.add(receivedItem);
+                    Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
+                    menuFoodItemAdapter.notifyDataSetChanged();
+                }
+            });
+
+            Log.e("ReceiveNewFoodmsgInMenu",foodName + foodPrice+""+ dishType+"");
+        }, String.class, Integer.class, Integer.class);
         return rootView;
     }
 }

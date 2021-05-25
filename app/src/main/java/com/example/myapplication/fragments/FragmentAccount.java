@@ -21,12 +21,15 @@ public class FragmentAccount extends Fragment {
     Button logOutBtn;
     String name ="";
     String accountType = "";
+    TextView txtName, txtTitle;
 
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_account, container,false);
+        txtName = rootView.findViewById(R.id.displayName);
+        txtTitle = rootView.findViewById(R.id.role_name);
 
 
         Account account = (Account) getArguments().get("Account_obj");
@@ -45,10 +48,12 @@ public class FragmentAccount extends Fragment {
                 accountType = "Phục vụ bàn";
                 break;
         }
+        txtName.setText(name);
+        txtTitle.setText(accountType);
 
 
-        ((TextView)rootView.findViewById(R.id.displayName)).setText(name);
-        ((TextView)rootView.findViewById(R.id.role_name)).setText(accountType);
+       // ((TextView)rootView.findViewById(R.id.displayName)).setText(name);
+       // ((TextView)rootView.findViewById(R.id.role_name)).setText(accountType);
         logOutBtn = rootView.findViewById(R.id.logoutBtn);
         logOutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
