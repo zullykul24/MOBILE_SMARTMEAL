@@ -17,20 +17,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplication.R;
 import com.example.myapplication.activities.Order;
 import com.example.myapplication.adapters.TableItemAdapter;
 import com.example.myapplication.api.ApiClient;
+import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.Account;
-import com.example.myapplication.models.MenuFoodItem;
-import com.example.myapplication.models.TableItem;
+import com.example.myapplication.models.Table;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
-import com.microsoft.signalr.HubConnectionState;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FragmentTableOrder extends Fragment {
     TextView tableTitle;
@@ -40,9 +44,10 @@ public class FragmentTableOrder extends Fragment {
     private String COLOR_FILLED;
     private String COLOR_BOOKED;
     private String COLOR_EMPTY;
+    private ArrayList<Table> responseList;
 
 
-    ArrayList<TableItem> tableItemArrayList;
+    ArrayList<Table> tableArrayList;
     public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
         getActivity().getMenuInflater().inflate(R.menu.set_table_status, menu);
         menu.setHeaderTitle("Đặt trạng thái");
@@ -54,28 +59,58 @@ public class FragmentTableOrder extends Fragment {
 
         switch(item.getItemId()){
             case R.id.status_booked:
-                if (tableItemArrayList.get(info.position).getStatus() == 0) {
-                    /*
-                    database.QueryData("update group_table set status = 'Booked'  where tableId = " + tableItemArrayList.get(info.position).getId() + ";");
-                    */
-                    ////
+                if (tableArrayList.get(info.position).getStatus() == 0) {
+                    tableArrayList.get(info.position).setStatus(-1);
+
+                    ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            Log.e("rspcode", response.code()+"");
+                            if(response.code() == 200){
+                                hubConnection.send("ChangeTableState",info.position, -1);
+                                Toast.makeText(getContext(), "Đặt trước thành công", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
 
-                    hubConnection.send("ChangeTableState",info.position, -1);
-                    Toast.makeText(getContext(), "Đặt trước thành công", Toast.LENGTH_SHORT).show();
+
                     ///why is this toast not shown?
                     return true;
                 }
                 else return false;
                 // ??? : sau nay se phai sua cai nayf
             case R.id.status_empty:
-                if (tableItemArrayList.get(info.position).getStatus() == -1) {
+                if (tableArrayList.get(info.position).getStatus() == -1) {
                     /*
                     database.QueryData("update group_table set status = 'Empty'  where tableId = " + tableItemArrayList.get(info.position).getId() + ";");
                     */
+                    tableArrayList.get(info.position).setStatus(0);
+                    ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if(response.code() == 200){
+                                hubConnection.send("ChangeTableState",info.position, 0);
+                                Toast.makeText(getContext(), "Bàn trống thành công", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                    hubConnection.send("ChangeTableState",info.position, 0);
-                    Toast.makeText(getContext(), "Bàn trống thành công", Toast.LENGTH_SHORT).show();
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+
                     //why is this toast not shown?
                     return true;
                 }
@@ -101,52 +136,60 @@ public class FragmentTableOrder extends Fragment {
 
 
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
-        tableItemArrayList = new ArrayList<>();
+        tableArrayList = new ArrayList<>();
+        tableItemAdapter = new TableItemAdapter(getContext(), R.layout.table_item, tableArrayList);
 
-        tableItemArrayList.add(new TableItem(1));
-        tableItemArrayList.add(new TableItem(2));
-        tableItemArrayList.add(new TableItem(3));
-        tableItemArrayList.add(new TableItem(4));
-        tableItemArrayList.add(new TableItem(5,1));
-        tableItemArrayList.add(new TableItem(6,-1));
-        tableItemArrayList.add(new TableItem(7,1));
-        tableItemArrayList.add(new TableItem(8,-1));
-        tableItemArrayList.add(new TableItem(9));
-        tableItemArrayList.add(new TableItem(10));
+        ApiClient.getApiClient().create(ApiInterface.class).getListTable().enqueue(new Callback<List<Table>>() {
+            @Override
+            public void onResponse(Call<List<Table>> call, Response<List<Table>> response) {
+                responseList = (ArrayList<Table>) response.body();
+                for (Table i:responseList){
+                    /// thêm tất cả các món từ response vào menuItemArrayList
+                    tableArrayList.add(new Table(i.getTableId(),i.getSeatAmount(), i.getStatus()));
+                }
+                for(Table i: tableArrayList){
+                    if(i.getStatus() == 1){
+                        i.setColor(COLOR_FILLED);
+                    }
+                    else if(i.getStatus() == -1){
+                        i.setColor(COLOR_BOOKED);
+                    }
+                    else
+                    {
+                        i.setColor(COLOR_EMPTY);
+                    }
+                }
+                gridViewTable.setAdapter(tableItemAdapter);
 
+            }
 
-        for(TableItem i:tableItemArrayList){
-            if(i.getStatus() == 1){
-                i.setColor(COLOR_FILLED);
+            @Override
+            public void onFailure(Call<List<Table>> call, Throwable t) {
+                Log.e("Get list tables status:", "Failed"+ t);
             }
-            else if(i.getStatus() == -1){
-                i.setColor(COLOR_BOOKED);
-            }
-            else
-            {
-                i.setColor(COLOR_EMPTY);
-            }
-        }
-        tableItemAdapter = new TableItemAdapter(getContext(), R.layout.table_item,tableItemArrayList );
+        });
+
         tableItemAdapter.notifyDataSetChanged();
-        gridViewTable.setAdapter(tableItemAdapter);
+
+        //tableItemAdapter.notifyDataSetChanged();
+
         /////
         hubConnection.on("ReceiveTableState", (tableId, tag) ->{
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     if(tag == 0){
-                        tableItemArrayList.get(tableId).setStatus(0);
-                        tableItemArrayList.get(tableId).setColor(COLOR_BOOKED);
+                        tableArrayList.get(tableId).setStatus(0);
+                        tableArrayList.get(tableId).setColor(COLOR_EMPTY);
                     }
                     else if(tag == -1)
                     {
-                        tableItemArrayList.get(tableId).setStatus(-1);
-                        tableItemArrayList.get(tableId).setColor(COLOR_EMPTY);
+                        tableArrayList.get(tableId).setStatus(-1);
+                        tableArrayList.get(tableId).setColor(COLOR_BOOKED);
                     }
                     else {
-                        tableItemArrayList.get(tableId).setStatus(1);
-                        tableItemArrayList.get(tableId).setColor(COLOR_FILLED);
+                        tableArrayList.get(tableId).setStatus(1);
+                        tableArrayList.get(tableId).setColor(COLOR_FILLED);
                     }
                     tableItemAdapter.notifyDataSetChanged();
                 }
@@ -159,13 +202,13 @@ public class FragmentTableOrder extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Toast.makeText(getActivity().getApplicationContext(), tableItemArrayList.get(position).getName(), Toast.LENGTH_SHORT).show();
-                int status = tableItemArrayList.get(position).getStatus();
+                int status = tableArrayList.get(position).getStatus();
                 // chỉnh sửa chỗ này để trạng thái nào cũng có thể vào chỉnh sửa món ăn
                 //if(status.equals("Empty")) {
                 Intent intentToOrder = new Intent(getActivity(), Order.class);
-                intentToOrder.putExtra("Tên bàn", tableItemArrayList.get(position).getName());
-                intentToOrder.putExtra("Bàn id", tableItemArrayList.get(position).getId());
-                intentToOrder.putExtra("Bàn Status", tableItemArrayList.get(position).getStatus());
+                intentToOrder.putExtra("Tên bàn", tableArrayList.get(position).getName());
+                intentToOrder.putExtra("Bàn id", tableArrayList.get(position).getTableId());
+                intentToOrder.putExtra("Bàn Status", tableArrayList.get(position).getStatus());
                 intentToOrder.putExtra("accountUsername",  account.getUsername());
                 startActivityForResult(intentToOrder, 114);
                 // }
@@ -178,15 +221,21 @@ public class FragmentTableOrder extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==114&& resultCode == 291){
-            for(TableItem i:tableItemArrayList){
-                if(i.getId() == data.getIntExtra("banId", 1)){
+            for(Table i: tableArrayList){
+                if(i.getTableId() == data.getIntExtra("banId", 1)){
                     //i.setColor(COLOR_FILLED);
-                    hubConnection.send("ChangeTableState",i.getId() -1, 1);
+                    hubConnection.send("ChangeTableState",i.getTableId() -1, 1);
                 }
             }
             ///reload fragment
            // FragmentTransaction ft = getFragmentManager().beginTransaction();
            // ft.replace(R.id.fragment_container,new FragmentTableOrder()).addToBackStack(null).commit();
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        hubConnection.close();
     }
 }

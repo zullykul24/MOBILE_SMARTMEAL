@@ -4,7 +4,7 @@ import com.example.myapplication.R;
 
 import java.io.Serializable;
 
-public class TableItem implements Serializable {
+public class Table implements Serializable {
     private String name;
     private int status;
     // empty:0
@@ -12,25 +12,33 @@ public class TableItem implements Serializable {
     //filled:1
     private String color;
     private int image;
-    private  int id;
-    public int getId() {
-        return id;
+    private  int tableId;
+    private  int seatAmount;
+    public int getTableId() {
+        return tableId;
     }
-    public void setId(int id) {
-        this.id = id;
+    public void setTableId(int tableId) {
+        this.tableId = tableId;
     }
-    public TableItem(int id){
-        this.id = id;
-        this.status = 0;
-        this.image = R.drawable.table_icon;
+
+
+    public int getSeatAmount() {
+        return seatAmount;
+    }
+
+    public void setSeatAmount(int seatAmount) {
+        this.seatAmount = seatAmount;
+    }
+
+    public Table(int tableId, int seatAmount, int Status) {
+        this.status = Status;
+        this.tableId = tableId;
+        this.seatAmount = seatAmount;
         this.color = "#4EC33A";
-    }
-    public TableItem(int id, int status){
-        this.id = id;
-        this.status = status;
         this.image = R.drawable.table_icon;
-        this.color = "#4EC33A";
     }
+
+
     public String getName() {
         return name;
     }

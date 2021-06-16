@@ -10,14 +10,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.myapplication.R;
-import com.example.myapplication.models.TableItem;
+import com.example.myapplication.models.Table;
 
 import java.util.List;
 
 public class TableItemAdapter extends BaseAdapter {
     private Context context;
     private int layout;
-    private List<TableItem> tableItemList;
+    private List<Table> tableList;
 
 
     /// tạo ra view holder để ko phải ánh xạ lại những items đã lướt qua khi mình lướt lại
@@ -26,16 +26,16 @@ public class TableItemAdapter extends BaseAdapter {
         TextView name;
     }
 
-    public TableItemAdapter(Context context, int layout, List<TableItem> tableItemList) {
+    public TableItemAdapter(Context context, int layout, List<Table> tableList) {
         this.context = context;
         this.layout = layout;
-        this.tableItemList = tableItemList;
+        this.tableList = tableList;
     }
 
     @Override
     public int getCount() {
         // very important
-        return tableItemList.size();
+        return tableList.size();
     }
 
     @Override
@@ -65,11 +65,11 @@ public class TableItemAdapter extends BaseAdapter {
 
         //gán giá trị
 
-        TableItem tableItem = tableItemList.get(position);
-        holder.name.setText("Bàn số "+tableItem.getId());
+        Table table = tableList.get(position);
+        holder.name.setText("Bàn số "+ table.getTableId());
         // holder.chair_number.setText("Số ghế "+tableItem.getChair_number());
-        holder.image.setImageResource(tableItem.getImage());
-        holder.image.setBackgroundColor(Color.parseColor(tableItem.getColor()));
+        holder.image.setImageResource(table.getImage());
+        holder.image.setBackgroundColor(Color.parseColor(table.getColor()));
 
         return convertView;
     }
