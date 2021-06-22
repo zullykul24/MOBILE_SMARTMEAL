@@ -206,9 +206,9 @@ public class FragmentTableOrder extends Fragment {
                 // chỉnh sửa chỗ này để trạng thái nào cũng có thể vào chỉnh sửa món ăn
                 //if(status.equals("Empty")) {
                 Intent intentToOrder = new Intent(getActivity(), Order.class);
-                intentToOrder.putExtra("Tên bàn", tableArrayList.get(position).getName());
-                intentToOrder.putExtra("Bàn id", tableArrayList.get(position).getTableId());
-                intentToOrder.putExtra("Bàn Status", tableArrayList.get(position).getStatus());
+               // intentToOrder.putExtra("Tên bàn", tableArrayList.get(position).getName());
+                intentToOrder.putExtra("Table_id", tableArrayList.get(position).getTableId());
+                intentToOrder.putExtra("Table_status", tableArrayList.get(position).getStatus());
                 intentToOrder.putExtra("accountUsername",  account.getUsername());
                 startActivityForResult(intentToOrder, 114);
                 // }

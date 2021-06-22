@@ -125,6 +125,7 @@ public class AddFood extends AppCompatActivity {
             String foodName = name.getText().toString().trim();
             String foodPrice = price.getText().toString().trim();
             String foodBase64Image = Base64.encodeToString(hinhanh,0);
+
             item = new MenuFoodItem(0,foodName, Integer.parseInt(foodPrice), dishType, foodBase64Image);
 
 

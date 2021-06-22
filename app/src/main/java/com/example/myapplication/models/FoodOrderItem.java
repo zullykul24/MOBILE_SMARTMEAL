@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class FoodOrderItem implements Serializable {
     private MenuFoodItem item;
     private int number;
-    private String note;
+
 
     public FoodOrderItem(int dish_id, String dish_name, int price, int dishType_id, String imageUrl) {
         item = new MenuFoodItem(dish_name, price, dishType_id, imageUrl);
@@ -60,6 +60,5 @@ public class FoodOrderItem implements Serializable {
     }
 
 
-    public String getNote() {return this.note;}
-    public void setNote(String note) {this.note = note;}
+
 }

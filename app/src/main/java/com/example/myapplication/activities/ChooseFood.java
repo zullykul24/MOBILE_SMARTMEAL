@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -16,10 +17,19 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.MenuFoodItemAdapter;
+import com.example.myapplication.api.ApiClient;
+import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.MenuFoodItem;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ChooseFood extends AppCompatActivity {
     ListView listViewFood;
@@ -27,6 +37,7 @@ public class ChooseFood extends AppCompatActivity {
     MenuFoodItemAdapter menuFoodItemAdapter;
     ArrayList<MenuFoodItem> menuItemArrayList;
     EditText searchText;
+    private List<MenuFoodItem> responseList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -40,6 +51,24 @@ public class ChooseFood extends AppCompatActivity {
         /// add món vào list này nè
         ///
         //////chỗ này lấy ảnh test thôi
+        ApiClient.getApiClient().create(ApiInterface.class).getListDishes().enqueue(new Callback<List<MenuFoodItem>>() {
+            @Override
+            public void onResponse(Call<List<MenuFoodItem>> call, Response<List<MenuFoodItem>> response) {
+                responseList = (ArrayList<MenuFoodItem>) response.body();
+                for (MenuFoodItem i:responseList){
+                    /// thêm tất cả các món từ response vào menuItemArrayList
+                    menuItemArrayList.add(new MenuFoodItem(i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                }
+                Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
+                Log.e("Get list dishes status:", "Success");
+                menuFoodItemAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<MenuFoodItem>> call, Throwable t) {
+                Log.e("Get list dishes status:", "Failed"+ t);
+            }
+        });
 
 
 

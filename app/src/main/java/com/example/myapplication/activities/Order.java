@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,68 +22,99 @@ import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.example.myapplication.R;
+import com.example.myapplication.adapters.FoodOrderBookedItemAdapter;
 import com.example.myapplication.adapters.FoodOrderItemAdapter;
+import com.example.myapplication.api.ApiClient;
+import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.fragments.FragmentTableOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.MenuFoodItem;
+import com.example.myapplication.models.Table;
 
 import java.util.ArrayList;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Order extends AppCompatActivity {
     TextView tableName;
     Button themMonBtn;
     SwipeMenuListView listViewChosenFood;
+    ListView bookedListView;
     Button btn_ok ;
     Button btn_cancel ;
     ImageButton backToFragmentTableOrder;
     ArrayList<FoodOrderItem> arrayListChosenFood;
-    EditText note;
+    ArrayList<FoodOrderItem> arrayListBooked;
+
     FoodOrderItemAdapter adapterChosenFood;
+    FoodOrderBookedItemAdapter adapterBooked;
     long millis=System.currentTimeMillis();
     java.sql.Date date=new java.sql.Date(millis);
-    int banId;
-    String banStatus;
+    int table_Id;
+    int table_Status;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order);
-        banId = getIntent().getIntExtra("Bàn id", 1);
+        table_Id = getIntent().getIntExtra("Table_id", 1);
         tableName = (TextView)findViewById(R.id.nameOfIntentedTable);
         themMonBtn = (Button)findViewById(R.id.themMonBtn);
         backToFragmentTableOrder = (ImageButton)findViewById(R.id.back_to_fragment_table_order);
-        banStatus = getIntent().getStringExtra("Bàn Status");
+        table_Status = getIntent().getIntExtra("Table_status", 0);
         // là cái thanh cuộn các món ở dưới.
         listViewChosenFood = (SwipeMenuListView) findViewById(R.id.listViewChosenFood);
+        bookedListView = (ListView) findViewById(R.id.bookedList);
         View footer = getLayoutInflater().inflate(R.layout.footer, null);
+
         // add thêm cái footer ghi chú và button OK
         listViewChosenFood.addFooterView(footer);
         btn_ok = (Button) findViewById(R.id.btn_ok_order);
         btn_cancel = (Button) findViewById(R.id.btn_cancel_order);
-        note = (EditText) findViewById(R.id.noteFooter);
-        if(!banStatus.equals("Empty") && !banStatus.equals("Booked")) {
-           /* Cursor cursor = database.getData("Select * from orders where orderId  = (select max(orderId) from orders where tableId = " + banId + ")");
-            while (cursor.moveToNext()) {
-                note.setText(cursor.getString(2));
-            }
 
-            */
-        }
+
         btn_ok = (Button)findViewById(R.id.btn_ok_order);
         btn_cancel = (Button) findViewById(R.id.btn_cancel_order);
-        note = (EditText) findViewById(R.id.noteFooter);
+
+
+        //test
+        arrayListBooked = new ArrayList<>();
+
+        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
+        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
+        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
+        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
+        adapterBooked = new FoodOrderBookedItemAdapter(Order.this, R.layout.food_order_booked_item, arrayListBooked);
+        bookedListView.setAdapter(adapterBooked);
+
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                if(banStatus.equals("Empty") || banStatus.equals("Booked")){
+                if(table_Status == 0 || table_Status == -1 ){
                     if(!arrayListChosenFood.isEmpty()){
-                        if(note.getText().toString().trim().length()>0)
-                        {
-                            //  database.QueryData("insert into orders values(null,"+banId+",'"+note.getText().toString()+"' , 0)");
-                        }else {
-                            // database.QueryData("insert into orders values(null,"+banId+",null , 0)");
-                        }
+                        Table table = new Table(0,0,1);
+
                         // database.QueryData("update group_table set status = 'Not Empty'  where tableId = " + banId + ";");
+
+                        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(table_Id), table).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if(response.code() == 200){
+                                   // hubConnection.send("ChangeTableState",table_Id - 1, 0);
+                                    Toast.makeText(Order.this, "Đặt món thành công", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(Order.this, "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Toast.makeText(Order.this, "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
                 }
                /* Cursor cursor =  database.getData("Select * from orders where tableId = " + banId + " order by orderId DESC Limit 1 ; ");
@@ -112,9 +146,9 @@ public class Order extends AppCompatActivity {
 
                 */
 
-                //database.QueryData("update orders set note = '"+note.getText().toString()+"' where orderId = "+orderId+"");
+
                 Intent intent = new Intent(Order.this, FragmentTableOrder.class);
-                intent.putExtra("banId", banId);
+                intent.putExtra("banId", table_Id);
                 setResult(291,intent );
                 finish();
             }
@@ -126,8 +160,8 @@ public class Order extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        String nameOfTableSelected = intent.getStringExtra("Tên bàn");
-        tableName.setText(nameOfTableSelected);
+
+        tableName.setText("Bàn số "+ table_Id);
 
         MenuFoodItem v = (MenuFoodItem) intent.getSerializableExtra("abc");
 
@@ -148,6 +182,8 @@ public class Order extends AppCompatActivity {
                 finish();
             }
         });
+        setDynamicHeight(bookedListView);
+        setDynamicHeight(listViewChosenFood);
     }
 
 
@@ -197,9 +233,34 @@ public class Order extends AppCompatActivity {
                         return false;
                     }
                 });
+                setDynamicHeight(listViewChosenFood);
+
 
 
             }
         }
+    }
+    /**
+     * Set listview height based on listview children
+     *
+     * @param listView
+     */
+    public static void setDynamicHeight(ListView listView) {
+        ListAdapter adapter = listView.getAdapter();
+        //check adapter if null
+        if (adapter == null) {
+            return;
+        }
+        int height = 0;
+        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
+        for (int i = 0; i < adapter.getCount(); i++) {
+            View listItem = adapter.getView(i, null, listView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            height += listItem.getMeasuredHeight();
+        }
+        ViewGroup.LayoutParams layoutParams = listView.getLayoutParams();
+        layoutParams.height = height + (listView.getDividerHeight() * (adapter.getCount() - 1));
+        listView.setLayoutParams(layoutParams);
+        listView.requestLayout();
     }
 }
