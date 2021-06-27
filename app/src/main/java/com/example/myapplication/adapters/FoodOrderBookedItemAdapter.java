@@ -70,14 +70,14 @@ public class FoodOrderBookedItemAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         final FoodOrderItem menu = foodOrderItem.get(position); // lay tung cai mot ra
-        holder.name.setText(menu.getDish_name());
+        holder.name.setText(menu.getDishName());
         DecimalFormat df= new DecimalFormat("###,###,###");
         String priceString = df.format(menu.getPrice());
         holder.price.setText(priceString+"đ");
         holder.number.setText(Integer.toString(menu.getNumber()));
 
 
-        String imgUrl = menu.getImageUrl();
+        String imgUrl = menu.getImage();
         Picasso.with(context).load(imgUrl).into(holder.image);
 
 

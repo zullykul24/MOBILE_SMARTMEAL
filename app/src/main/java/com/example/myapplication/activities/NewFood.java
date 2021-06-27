@@ -65,7 +65,7 @@ public class NewFood extends AppCompatActivity {
                 responseList = (ArrayList<MenuFoodItem>) response.body();
                 for (MenuFoodItem i:responseList){
                     /// thêm tất cả các món từ response vào menuItemArrayList
-                    arrayNewFood.add(0,new MenuFoodItem( i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                    arrayNewFood.add(new MenuFoodItem( i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
                 }
                 Log.e("Get list dishes status:", "Success");
                 menuFoodItemAdapter.notifyDataSetChanged();
@@ -91,7 +91,7 @@ public class NewFood extends AppCompatActivity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    receivedItem = new MenuFoodItem(foodName,foodPrice, dishType, ApiClient.BASE_URL);
+                    receivedItem = new MenuFoodItem(0,foodName,foodPrice, dishType, ApiClient.BASE_URL);
                     arrayNewFood.add(0, receivedItem);
                     menuFoodItemAdapter.notifyDataSetChanged();
                 }

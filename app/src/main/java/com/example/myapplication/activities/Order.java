@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import com.example.myapplication.models.MenuFoodItem;
 import com.example.myapplication.models.Table;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -47,7 +49,7 @@ public class Order extends AppCompatActivity {
     Button btn_cancel ;
     ImageButton backToFragmentTableOrder;
     ArrayList<FoodOrderItem> arrayListChosenFood;
-    ArrayList<FoodOrderItem> arrayListBooked;
+    ArrayList<FoodOrderItem> arrayListBooked, responseList;
 
     FoodOrderItemAdapter adapterChosenFood;
     FoodOrderBookedItemAdapter adapterBooked;
@@ -82,10 +84,27 @@ public class Order extends AppCompatActivity {
         //test
         arrayListBooked = new ArrayList<>();
 
-        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
-        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
-        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
-        arrayListBooked.add(new FoodOrderItem(0,"name", 10,1,"333"));
+        ApiClient.getApiClient().create(ApiInterface.class).getListBookedByTable(table_Id).enqueue(new Callback<List<FoodOrderItem>>() {
+            @Override
+            public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
+                responseList = (ArrayList<FoodOrderItem>) response.body();
+                for (FoodOrderItem i:responseList){
+                    /// thêm tất cả các món từ response vào list booked
+                    arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                }
+                Log.e("Get list booked status:", "Success");
+                Log.e("get status", response+"");
+                adapterBooked.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
+                Log.e("Get list booked status:", "Failed"+ t);
+            }
+        });
+
+
         adapterBooked = new FoodOrderBookedItemAdapter(Order.this, R.layout.food_order_booked_item, arrayListBooked);
         bookedListView.setAdapter(adapterBooked);
 
@@ -226,7 +245,7 @@ public class Order extends AppCompatActivity {
                 listViewChosenFood.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                        Toast.makeText(getApplicationContext(),arrayListChosenFood.get(position).getDish_name(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(),arrayListChosenFood.get(position).getDishName(),Toast.LENGTH_SHORT).show();
                         arrayListChosenFood.remove(position);
                         adapterChosenFood.notifyDataSetChanged();
                         // false : close the menu; true : not close the menu

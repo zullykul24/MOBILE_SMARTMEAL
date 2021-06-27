@@ -25,6 +25,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.MenuFoodItem;
+import com.example.myapplication.models.UploadFoodItem;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.microsoft.signalr.HubConnectionState;
@@ -49,7 +50,7 @@ public class AddFood extends AppCompatActivity {
     private int dishType = 0;
     RadioButton type_food, type_drink;
     RadioGroup radioGroup;
-    private MenuFoodItem item;
+    private UploadFoodItem item;
     HubConnection hubConnection;
 
     @Override
@@ -126,7 +127,7 @@ public class AddFood extends AppCompatActivity {
             String foodPrice = price.getText().toString().trim();
             String foodBase64Image = Base64.encodeToString(hinhanh,0);
 
-            item = new MenuFoodItem(0,foodName, Integer.parseInt(foodPrice), dishType, foodBase64Image);
+            item = new UploadFoodItem(foodName, Integer.parseInt(foodPrice), dishType, foodBase64Image);
 
 
             ApiClient.getApiClient().create(ApiInterface.class).addNewFood(item).enqueue(new Callback<ResponseBody>() {

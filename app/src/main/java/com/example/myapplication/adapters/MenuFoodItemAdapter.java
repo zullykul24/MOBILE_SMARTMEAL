@@ -92,7 +92,7 @@ public class MenuFoodItemAdapter extends BaseAdapter implements Filterable {
                         data = VNCharacterUtils.removeAccent(data);
                         //  if (data.toLowerCase().startsWith(constraint.toString())) {
                         if (data.toLowerCase().contains(VNCharacterUtils.removeAccent(constraint.toString()))) {
-                            FilteredArrList.add(new MenuFoodItem(originalList.get(i).getDishName(),originalList.get(i).getPrice(), originalList.get(i).getDishTypeId(), originalList.get(i).getImage()));
+                            FilteredArrList.add(new MenuFoodItem(originalList.get(i).getDishId(),originalList.get(i).getDishName(),originalList.get(i).getPrice(), originalList.get(i).getDishTypeId(), originalList.get(i).getImage()));
                         }
                     }
                     // set the Filtered result to return
