@@ -3,7 +3,7 @@ package com.example.myapplication.models;
 import java.io.Serializable;
 
 public class Account implements Serializable {
-
+    private int accountId;
     private String username;
     private String password;
     private String fullName;
@@ -11,8 +11,9 @@ public class Account implements Serializable {
     private int roleId;
 
 
-    public Account(String username, String password, String fullName, String phoneNumber, int roleId) {
+    public Account(int accountId,String username, String password, String fullName, String phoneNumber, int roleId) {
         this.username = username;
+        this.accountId = accountId;
         this.password = password;
         this.fullName = fullName;
         this.phoneNumber = phoneNumber;
@@ -20,8 +21,13 @@ public class Account implements Serializable {
     }
 
 
+    public int getAccountId() {
+        return accountId;
+    }
 
-
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
+    }
 
     public String getUsername() {
         return username;

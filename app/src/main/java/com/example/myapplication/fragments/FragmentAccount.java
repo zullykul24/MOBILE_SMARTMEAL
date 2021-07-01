@@ -32,7 +32,7 @@ public class FragmentAccount extends Fragment {
         txtTitle = rootView.findViewById(R.id.role_name);
 
 
-        Account account = (Account) getArguments().get("Account_obj");
+        Account account = DataLocalManager.getLoggedinAccount();
         name = account.getFullName();
         switch (account.getRoleId()){
             case 1:

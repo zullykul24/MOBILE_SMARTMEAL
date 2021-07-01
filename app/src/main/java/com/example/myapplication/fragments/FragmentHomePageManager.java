@@ -20,6 +20,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.activities.AddFood;
 import com.example.myapplication.activities.NewFood;
 import com.example.myapplication.activities.Payment;
+import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.models.Account;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -38,7 +39,7 @@ public class FragmentHomePageManager extends Fragment {
         historyBtn = rootView.findViewById(R.id.manager_payment);
         menuFoodBtn = rootView.findViewById(R.id.menuFood);
         final FragmentManager fragmentManager = getFragmentManager();
-        Account account = (Account) getArguments().get("Account_obj");
+        Account account = DataLocalManager.getLoggedinAccount();
         ////
         /// glide để bo góc ảnh
         Glide.with(this).load(R.drawable.new_food).circleCrop().into(newFoodBtn);

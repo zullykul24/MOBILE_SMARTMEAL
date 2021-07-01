@@ -23,6 +23,7 @@ import com.example.myapplication.activities.Order;
 import com.example.myapplication.adapters.TableItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
+import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.models.Account;
 import com.example.myapplication.models.Table;
 import com.microsoft.signalr.HubConnection;
@@ -130,7 +131,7 @@ public class FragmentTableOrder extends Fragment {
         COLOR_EMPTY = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorEmptyTable));
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"changeTableStateHub").build();
         hubConnection.start();
-        Account account = (Account) getArguments().get("Account_obj");
+        Account account = DataLocalManager.getLoggedinAccount();
 
 
 
@@ -224,7 +225,7 @@ public class FragmentTableOrder extends Fragment {
             for(Table i: tableArrayList){
                 if(i.getTableId() == data.getIntExtra("banId", 1)){
                     //i.setColor(COLOR_FILLED);
-                    hubConnection.send("ChangeTableState",i.getTableId() -1, 1);
+                  //  hubConnection.send("ChangeTableState",i.getTableId() -1, 1);
                 }
             }
             ///reload fragment

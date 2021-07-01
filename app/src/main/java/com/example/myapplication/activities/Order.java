@@ -27,6 +27,7 @@ import com.example.myapplication.adapters.FoodOrderBookedItemAdapter;
 import com.example.myapplication.adapters.FoodOrderItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
+import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.fragments.FragmentTableOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.MenuFoodItem;
@@ -48,7 +49,7 @@ public class Order extends AppCompatActivity {
     Button btn_ok ;
     Button btn_cancel ;
     ImageButton backToFragmentTableOrder;
-    ArrayList<FoodOrderItem> arrayListChosenFood;
+    ArrayList<FoodOrderItem> arrayListChosenFood, arrayListPost;
     ArrayList<FoodOrderItem> arrayListBooked, responseList;
 
     FoodOrderItemAdapter adapterChosenFood;
@@ -83,26 +84,28 @@ public class Order extends AppCompatActivity {
 
         //test
         arrayListBooked = new ArrayList<>();
+        if(table_Status == 1){
+            ApiClient.getApiClient().create(ApiInterface.class).getListBookedByTable(table_Id).enqueue(new Callback<List<FoodOrderItem>>() {
+                @Override
+                public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
+                    responseList = (ArrayList<FoodOrderItem>) response.body();
+                    for (FoodOrderItem i:responseList){
+                        /// thêm tất cả các món từ response vào list booked
+                        arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                    }
+                    Log.e("Get list booked status:", "Success");
+                    Log.e("get status", response+"");
+                    adapterBooked.notifyDataSetChanged();
 
-        ApiClient.getApiClient().create(ApiInterface.class).getListBookedByTable(table_Id).enqueue(new Callback<List<FoodOrderItem>>() {
-            @Override
-            public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
-                responseList = (ArrayList<FoodOrderItem>) response.body();
-                for (FoodOrderItem i:responseList){
-                    /// thêm tất cả các món từ response vào list booked
-                    arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
                 }
-                Log.e("Get list booked status:", "Success");
-                Log.e("get status", response+"");
-                adapterBooked.notifyDataSetChanged();
 
-            }
+                @Override
+                public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
+                    Log.e("Get list booked status:", "Failed"+ t);
+                }
+            });
+        }
 
-            @Override
-            public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
-                Log.e("Get list booked status:", "Failed"+ t);
-            }
-        });
 
 
         adapterBooked = new FoodOrderBookedItemAdapter(Order.this, R.layout.food_order_booked_item, arrayListBooked);
@@ -116,8 +119,7 @@ public class Order extends AppCompatActivity {
                     if(!arrayListChosenFood.isEmpty()){
                         Table table = new Table(0,0,1);
 
-                        // database.QueryData("update group_table set status = 'Not Empty'  where tableId = " + banId + ";");
-
+            /// set status to 1 (is being served)
                         ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(table_Id), table).enqueue(new Callback<ResponseBody>() {
                             @Override
                             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -134,38 +136,33 @@ public class Order extends AppCompatActivity {
                                 Toast.makeText(Order.this, "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
                             }
                         });
+
                     }
-                }
-               /* Cursor cursor =  database.getData("Select * from orders where tableId = " + banId + " order by orderId DESC Limit 1 ; ");
-                int orderId =0;
-                String no = "";
-                while (cursor.moveToNext()){
-                    orderId = cursor.getInt(0);
-                    no = cursor.getString(2);
-                }
-
-
-
-                for( FoodOrderItem food : arrayListChosenFood){
-                        Cursor cursor1 = database.getData("SELECT * from orderdetails where orderId = " + orderId + " and dishId = " + food.getDish_id());
-                       // Nếu chưa từng đặt món này
-                        if (cursor1.getCount() == 0){
-                            database.QueryData("insert into orderdetails values ("+orderId+", "+food.getDish_id()+", "+getIntent().getIntExtra("AccountID", 0)+", "+food.getNumber()+" , "+date+ ")");
-                        }
-                        else
-                        {
-                            int quantityOrdered = 0;
-                            while (cursor1.moveToNext()){
-                                quantityOrdered = cursor1.getInt(3);
+                    //just post necessary info
+                    for(FoodOrderItem item:arrayListChosenFood){
+                        arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(), DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
+                    }
+                    ///post new orderdetails
+                    ApiClient.getApiClient().create(ApiInterface.class).postOrder(arrayListPost).enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if(response.code() == 200){
+                                Log.e("post order status: ", "ok");
                             }
-                            quantityOrdered += food.getNumber();
-                            database.QueryData("update orderdetails set quantityOrder = " + quantityOrdered + " where dishId = " + food.getDish_id());
+                            else {
+                                Log.e("post order status: ", "err");
+                            }
                         }
-              }
 
-                */
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.e("post order failed: ", t+"");
+                        }
+                    });
+                }
 
 
+                // intent back to fragment table order
                 Intent intent = new Intent(Order.this, FragmentTableOrder.class);
                 intent.putExtra("banId", table_Id);
                 setResult(291,intent );
@@ -185,6 +182,7 @@ public class Order extends AppCompatActivity {
         MenuFoodItem v = (MenuFoodItem) intent.getSerializableExtra("abc");
 
         arrayListChosenFood = new ArrayList<>();
+        arrayListPost = new ArrayList<>();
 
         themMonBtn.setOnClickListener(new View.OnClickListener() {
             @Override

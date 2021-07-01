@@ -39,5 +39,8 @@ import retrofit2.http.Path;
 
         @GET("Dish/Table/{tableId}")
         Call<List<FoodOrderItem>> getListBookedByTable(@Path("tableId") int tableID);
+
+        @POST("Orderdetail/Table")
+        Call<ResponseBody> postOrder(@Body List<FoodOrderItem> list);
     }
 

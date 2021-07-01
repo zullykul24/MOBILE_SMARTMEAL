@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.fragments.FragmentHomePageManager;
 import com.example.myapplication.fragments.FragmentHomePageKitchenStaff;
 import com.example.myapplication.fragments.FragmentHomePageWaiter;
@@ -35,16 +36,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         AnhXa();
 
-        //
-        Intent intent = getIntent();
-        Account account = (Account) intent.getSerializableExtra("Account_obj");
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("Account_obj", account);
+
+
+        Account account = DataLocalManager.getLoggedinAccount();
         final FragmentAccount fragmentAccount = new FragmentAccount();
-        fragmentAccount.setArguments(bundle);
         final FragmentMenuFood fragmentMenuFood = new FragmentMenuFood();
         final FragmentTableOrder fragmentTableOrder = new FragmentTableOrder();
-        fragmentTableOrder.setArguments(bundle);
 
         final FragmentManager fragmentManager = getSupportFragmentManager();
         final FragmentHomePageCashier cashierFragmentHomePage = new FragmentHomePageCashier();
@@ -54,19 +51,15 @@ public class MainActivity extends AppCompatActivity {
 
         switch (account.getRoleId()){
             case 1:
-                managerFragmentHomePage.setArguments(bundle);
                 fragmentManager.beginTransaction().add(R.id.fragment_container, managerFragmentHomePage, "MANAGER").commit();
                 break;
             case 2:
-                cashierFragmentHomePage.setArguments(bundle);
                 fragmentManager.beginTransaction().add(R.id.fragment_container, cashierFragmentHomePage, "CASHIER").commit();
                 break;
             case 3:
-                kitchenStaffFragmentHomePage.setArguments(bundle);
                 fragmentManager.beginTransaction().add(R.id.fragment_container, kitchenStaffFragmentHomePage, "KITCHEN_STAFF").commit();
                 break;
             case 4:
-                waiterFragmentHomePage.setArguments(bundle);
                 fragmentManager.beginTransaction().add(R.id.fragment_container, waiterFragmentHomePage, "WAITER").commit();
                 break;
         }

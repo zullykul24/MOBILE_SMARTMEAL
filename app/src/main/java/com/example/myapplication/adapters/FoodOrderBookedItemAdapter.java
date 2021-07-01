@@ -74,7 +74,7 @@ public class FoodOrderBookedItemAdapter extends BaseAdapter {
         DecimalFormat df= new DecimalFormat("###,###,###");
         String priceString = df.format(menu.getPrice());
         holder.price.setText(priceString+"đ");
-        holder.number.setText(Integer.toString(menu.getNumber()));
+        holder.number.setText(Integer.toString(menu.getQuantityOrder()));
 
 
         String imgUrl = menu.getImage();

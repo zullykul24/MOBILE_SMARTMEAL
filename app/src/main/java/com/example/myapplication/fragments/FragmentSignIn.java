@@ -19,7 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.chilkatsoft.CkCrypt2;
+
 import com.example.myapplication.models.Account;
 import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.R;
@@ -30,6 +30,7 @@ import com.example.myapplication.api.ApiInterface;
 import java.util.ArrayList;
 import java.util.List;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -91,7 +92,7 @@ public class FragmentSignIn extends Fragment {
     private void performLogin() {
         String stringUsername = username.getText().toString().trim();
         String stringPassword = password.getText().toString().trim();
-        CkCrypt2 crypt = new CkCrypt2();
+
         ApiClient.getApiClient().create(ApiInterface.class).getAccount(stringUsername).enqueue(new Callback<List<Account>>() {
             @Override
             public void onResponse(Call<List<Account>> call, Response<List<Account>> response) {
@@ -100,17 +101,14 @@ public class FragmentSignIn extends Fragment {
                 if(accountList == null || accountList.isEmpty()){
                     invalidMsgSignIn.setVisibility(View.VISIBLE);
                     password.getText().clear();
-                }
-                else if (stringUsername.equals(accountList.get(0).getUsername()) && crypt.BCryptVerify(stringPassword, accountList.get(0).getPassword())) {
-                       // intent o day
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable("Account_obj", accountList.get(0));
 
+                }
+                else if (stringUsername.equals(accountList.get(0).getUsername()) && BCrypt.verifyer().verify(stringPassword.toCharArray(), accountList.get(0).getPassword()).verified) {
+                       // intent o day
 
                     Intent intent = new Intent(getActivity(), MainActivity.class);
                     DataLocalManager.setIsLogin(true);
                     DataLocalManager.setLoggedinAccount(accountList.get(0));
-                    intent.putExtras(bundle);
                     startActivity(intent);
 
                 } else {
@@ -134,9 +132,6 @@ public class FragmentSignIn extends Fragment {
             return;
         } else {
             Intent intent = new Intent(getActivity(), MainActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("Account_obj",DataLocalManager.getLoggedinAccount());
-            intent.putExtras(bundle);
             startActivity(intent);
         }
     }

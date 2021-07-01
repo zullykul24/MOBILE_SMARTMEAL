@@ -154,7 +154,7 @@ public class FragmentSignUp extends Fragment {
                     invalidMsgSignUp.setText("Nhập lại mật khẩu không đúng");
                     invalidMsgSignUp.setVisibility(View.VISIBLE);
                 } else {
-                    mAccount = new Account(stringUsername, stringPassword, stringfullName, stringPhoneNumber, roleId);
+                    mAccount = new Account(0,stringUsername, stringPassword, stringfullName, stringPhoneNumber, roleId);
                     Log.e("new acc", mAccount.toString());
                     ApiClient.getApiClient().create(ApiInterface.class).createAccount(mAccount).enqueue(new Callback<ResponseBody>() {
                         @Override

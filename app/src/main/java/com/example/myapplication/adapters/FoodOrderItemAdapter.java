@@ -1,8 +1,6 @@
 package com.example.myapplication.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,7 +72,7 @@ public class FoodOrderItemAdapter extends BaseAdapter {
         DecimalFormat df= new DecimalFormat("###,###,###");
         String priceString = df.format(menu.getPrice());
         holder.price.setText(priceString+"đ");
-        holder.number.setText(Integer.toString(menu.getNumber()));
+        holder.number.setText(Integer.toString(menu.getQuantityOrder()));
         holder.plusBtn.setImageResource(R.drawable.plus);
         holder.minusBtn.setImageResource(R.drawable.minus);
 
@@ -85,11 +83,11 @@ public class FoodOrderItemAdapter extends BaseAdapter {
         holder.minusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (menu.getNumber() > 1){
-                    menu.setNumber(menu.getNumber()-1);
+                if (menu.getQuantityOrder() > 1){
+                    menu.setQuantityOrder(menu.getQuantityOrder()-1);
 
                 }
-                holder.number.setText(Integer.toString(menu.getNumber()));
+                holder.number.setText(Integer.toString(menu.getQuantityOrder()));
 
             }
         });
@@ -98,10 +96,10 @@ public class FoodOrderItemAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 
-                menu.setNumber(menu.getNumber()+1);
+                menu.setQuantityOrder(menu.getQuantityOrder()+1);
 
 
-                holder.number.setText(Integer.toString(menu.getNumber()));
+                holder.number.setText(Integer.toString(menu.getQuantityOrder()));
 
             }
         });
