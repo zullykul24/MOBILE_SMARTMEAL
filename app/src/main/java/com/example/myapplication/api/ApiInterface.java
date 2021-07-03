@@ -1,6 +1,7 @@
 package com.example.myapplication.api;
 
 import com.example.myapplication.models.Account;
+import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.MenuFoodItem;
 import com.example.myapplication.models.Table;
@@ -38,9 +39,12 @@ import retrofit2.http.Path;
         Call<ResponseBody> updateTableStatus(@Path("id") String id, @Body Table table);
 
         @GET("Dish/Table/{tableId}")
-        Call<List<FoodOrderItem>> getListBookedByTable(@Path("tableId") int tableID);
+        Call<List<FoodOrderItem>> getListBookedByTable(@Path("tableId") int tableId);
 
-        @POST("Orderdetail/Table")
+        @POST("OrderDetail/Table")
         Call<ResponseBody> postOrder(@Body List<FoodOrderItem> list);
+
+        @POST("Orders")
+        Call<ResponseBody> createOrder(@Body CreateOrder order);
     }
 

@@ -29,10 +29,12 @@ import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.fragments.FragmentTableOrder;
+import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.MenuFoodItem;
 import com.example.myapplication.models.Table;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,9 +91,10 @@ public class Order extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
                     responseList = (ArrayList<FoodOrderItem>) response.body();
+                    Log.e("list size", responseList.size()+"");
                     for (FoodOrderItem i:responseList){
                         /// thêm tất cả các món từ response vào list booked
-                        arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                        arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage(), i.getQuantityOrder()));
                     }
                     Log.e("Get list booked status:", "Success");
                     Log.e("get status", response+"");
@@ -114,9 +117,9 @@ public class Order extends AppCompatActivity {
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(!arrayListChosenFood.isEmpty()){
+                    if(table_Status == 0 || table_Status == -1 ){
 
-                if(table_Status == 0 || table_Status == -1 ){
-                    if(!arrayListChosenFood.isEmpty()){
                         Table table = new Table(0,0,1);
 
             /// set status to 1 (is being served)
@@ -137,7 +140,32 @@ public class Order extends AppCompatActivity {
                             }
                         });
 
+
+                        //// create new order
+                        CreateOrder order = new CreateOrder(0,table_Id,0);
+                        ApiClient.getApiClient().create(ApiInterface.class).createOrder(order).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                try {
+                                    if ((response.code() == 200) && response.body().string().equals("1")){
+                                        Log.e("Create order status :", "Ok");
+                                    }
+                                    else {
+                                        Log.e("Create order status :", "Not Ok with code" + response.code());
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.e("Create order status :", "Not Ok with throw" + t.toString());
+                            }
+                        });
+
                     }
+
                     //just post necessary info
                     for(FoodOrderItem item:arrayListChosenFood){
                         arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(), DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
@@ -146,11 +174,15 @@ public class Order extends AppCompatActivity {
                     ApiClient.getApiClient().create(ApiInterface.class).postOrder(arrayListPost).enqueue(new Callback<ResponseBody>() {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if(response.code() == 200){
-                                Log.e("post order status: ", "ok");
-                            }
-                            else {
-                                Log.e("post order status: ", "err");
+                            try {
+                                if(response.code() == 200 && response.body().string().equals("1")){
+                                    Log.e("post order status: ", "ok");
+                                }
+                                else {
+                                    Log.e("post order status: ", "err with code: "+response.code());
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
                             }
                         }
 
@@ -211,7 +243,7 @@ public class Order extends AppCompatActivity {
         if (requestCode == 999) {
             if (resultCode == -1) {
                 MenuFoodItem foodItem = (MenuFoodItem) data.getSerializableExtra("abc");
-                arrayListChosenFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage()));
+                arrayListChosenFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1));
                 adapterChosenFood = new FoodOrderItemAdapter(Order.this, R.layout.food_order_item, arrayListChosenFood);
                 listViewChosenFood.setAdapter(adapterChosenFood);
                 // Thêm trượt để xoá https://github.com/baoyongzhang/SwipeMenuListView
