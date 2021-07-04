@@ -23,7 +23,7 @@ import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.example.myapplication.R;
-import com.example.myapplication.adapters.FoodOrderBookedItemAdapter;
+
 import com.example.myapplication.adapters.FoodOrderItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
@@ -46,16 +46,16 @@ import retrofit2.Response;
 public class Order extends AppCompatActivity {
     TextView tableName;
     Button themMonBtn;
-    SwipeMenuListView listViewChosenFood;
-    ListView bookedListView;
-    Button btn_ok ;
-    Button btn_cancel ;
+    SwipeMenuListView listViewFood;
+    Button btn_ok;
+    Button btn_cancel;
     ImageButton backToFragmentTableOrder;
-    ArrayList<FoodOrderItem> arrayListChosenFood, arrayListPost;
-    ArrayList<FoodOrderItem> arrayListBooked, responseList;
+    ArrayList<FoodOrderItem> arrayListChosenFood, arrayListPost, arrayFood;
+    ArrayList<FoodOrderItem>  responseList;
+    String orderStatus = "";
 
-    FoodOrderItemAdapter adapterChosenFood;
-    FoodOrderBookedItemAdapter adapterBooked;
+    FoodOrderItemAdapter adapter;
+
     long millis=System.currentTimeMillis();
     java.sql.Date date=new java.sql.Date(millis);
     int table_Id;
@@ -70,12 +70,12 @@ public class Order extends AppCompatActivity {
         backToFragmentTableOrder = (ImageButton)findViewById(R.id.back_to_fragment_table_order);
         table_Status = getIntent().getIntExtra("Table_status", 0);
         // là cái thanh cuộn các món ở dưới.
-        listViewChosenFood = (SwipeMenuListView) findViewById(R.id.listViewChosenFood);
-        bookedListView = (ListView) findViewById(R.id.bookedList);
+        listViewFood = (SwipeMenuListView) findViewById(R.id.listViewChosenFood);
+
         View footer = getLayoutInflater().inflate(R.layout.footer, null);
 
         // add thêm cái footer ghi chú và button OK
-        listViewChosenFood.addFooterView(footer);
+        listViewFood.addFooterView(footer);
         btn_ok = (Button) findViewById(R.id.btn_ok_order);
         btn_cancel = (Button) findViewById(R.id.btn_cancel_order);
 
@@ -84,35 +84,15 @@ public class Order extends AppCompatActivity {
         btn_cancel = (Button) findViewById(R.id.btn_cancel_order);
 
 
-        //test
-        arrayListBooked = new ArrayList<>();
+        arrayFood = new ArrayList<>();
+        arrayListChosenFood = new ArrayList<>();
+        arrayListPost = new ArrayList<>();
         if(table_Status == 1){
-            ApiClient.getApiClient().create(ApiInterface.class).getListBookedByTable(table_Id).enqueue(new Callback<List<FoodOrderItem>>() {
-                @Override
-                public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
-                    responseList = (ArrayList<FoodOrderItem>) response.body();
-                    Log.e("list size", responseList.size()+"");
-                    for (FoodOrderItem i:responseList){
-                        /// thêm tất cả các món từ response vào list booked
-                        arrayListBooked.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage(), i.getQuantityOrder()));
-                    }
-                    Log.e("Get list booked status:", "Success");
-                    Log.e("get status", response+"");
-                    adapterBooked.notifyDataSetChanged();
-
-                }
-
-                @Override
-                public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
-                    Log.e("Get list booked status:", "Failed"+ t);
-                }
-            });
+            API_GetListBookedByTable(table_Id);
         }
 
-
-
-        adapterBooked = new FoodOrderBookedItemAdapter(Order.this, R.layout.food_order_booked_item, arrayListBooked);
-        bookedListView.setAdapter(adapterBooked);
+        adapter = new FoodOrderItemAdapter(Order.this, R.layout.food_order_item,arrayFood);
+        listViewFood.setAdapter(adapter);
 
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,81 +102,25 @@ public class Order extends AppCompatActivity {
 
                         Table table = new Table(0,0,1);
 
-            /// set status to 1 (is being served)
-                        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(table_Id), table).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if(response.code() == 200){
-                                   // hubConnection.send("ChangeTableState",table_Id - 1, 0);
-                                    Toast.makeText(Order.this, "Đặt món thành công", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(Order.this, "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Toast.makeText(Order.this, "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        /// set status to 1 (is being served)
+                        API_UpdateTableStatus(String.valueOf(table_Id), table);
 
 
                         //// create new order
                         CreateOrder order = new CreateOrder(0,table_Id,0);
-                        ApiClient.getApiClient().create(ApiInterface.class).createOrder(order).enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                try {
-                                    if ((response.code() == 200) && response.body().string().equals("1")){
-                                        Log.e("Create order status :", "Ok");
-                                    }
-                                    else {
-                                        Log.e("Create order status :", "Not Ok with code" + response.code());
-                                    }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.e("Create order status :", "Not Ok with throw" + t.toString());
-                            }
-                        });
-
+                        API_CreateOrder(order);
                     }
-
                     //just post necessary info
                     for(FoodOrderItem item:arrayListChosenFood){
                         arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(), DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
                     }
                     ///post new orderdetails
-                    ApiClient.getApiClient().create(ApiInterface.class).postOrder(arrayListPost).enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            try {
-                                if(response.code() == 200 && response.body().string().equals("1")){
-                                    Log.e("post order status: ", "ok");
-                                }
-                                else {
-                                    Log.e("post order status: ", "err with code: "+response.code());
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Log.e("post order failed: ", t+"");
-                        }
-                    });
+                    API_PostNewOrderDetail(arrayListPost);
                 }
-
-
                 // intent back to fragment table order
                 Intent intent = new Intent(Order.this, FragmentTableOrder.class);
                 intent.putExtra("banId", table_Id);
+                intent.putExtra("orderStatus", orderStatus);
                 setResult(291,intent );
                 finish();
             }
@@ -207,14 +131,9 @@ public class Order extends AppCompatActivity {
                 finish();
             }
         });
-        Intent intent = getIntent();
 
         tableName.setText("Bàn số "+ table_Id);
 
-        MenuFoodItem v = (MenuFoodItem) intent.getSerializableExtra("abc");
-
-        arrayListChosenFood = new ArrayList<>();
-        arrayListPost = new ArrayList<>();
 
         themMonBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -231,8 +150,7 @@ public class Order extends AppCompatActivity {
                 finish();
             }
         });
-        setDynamicHeight(bookedListView);
-        setDynamicHeight(listViewChosenFood);
+
     }
 
 
@@ -242,10 +160,12 @@ public class Order extends AppCompatActivity {
 
         if (requestCode == 999) {
             if (resultCode == -1) {
-                MenuFoodItem foodItem = (MenuFoodItem) data.getSerializableExtra("abc");
-                arrayListChosenFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1));
-                adapterChosenFood = new FoodOrderItemAdapter(Order.this, R.layout.food_order_item, arrayListChosenFood);
-                listViewChosenFood.setAdapter(adapterChosenFood);
+                MenuFoodItem foodItem = (MenuFoodItem) data.getSerializableExtra("itemChosenAtChooseFood");
+
+                arrayFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1,0));
+                arrayListChosenFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1,0));
+
+                listViewFood.setAdapter(adapter);
                 // Thêm trượt để xoá https://github.com/baoyongzhang/SwipeMenuListView
                 SwipeMenuCreator creator = new SwipeMenuCreator() {
 
@@ -270,46 +190,114 @@ public class Order extends AppCompatActivity {
                         menu.addMenuItem(deleteItem);
                     }
                 };
-                listViewChosenFood.setMenuCreator(creator);
+                listViewFood.setMenuCreator(creator);
                 /// set click cho item ở menu trượt
-                listViewChosenFood.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
+                listViewFood.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                        Toast.makeText(getApplicationContext(),arrayListChosenFood.get(position).getDishName(),Toast.LENGTH_SHORT).show();
-                        arrayListChosenFood.remove(position);
-                        adapterChosenFood.notifyDataSetChanged();
+                        Toast.makeText(getApplicationContext(),arrayFood.get(position).getDishName(),Toast.LENGTH_SHORT).show();
+                        if(arrayFood.get(position).getIsBooked() == 1) {
+                            return false;
+                        }
+                        arrayFood.remove(position);
+                        adapter.notifyDataSetChanged();
                         // false : close the menu; true : not close the menu
                         return false;
                     }
                 });
-                setDynamicHeight(listViewChosenFood);
-
-
 
             }
         }
     }
-    /**
-     * Set listview height based on listview children
-     *
-     * @param listView
-     */
-    public static void setDynamicHeight(ListView listView) {
-        ListAdapter adapter = listView.getAdapter();
-        //check adapter if null
-        if (adapter == null) {
-            return;
-        }
-        int height = 0;
-        int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        for (int i = 0; i < adapter.getCount(); i++) {
-            View listItem = adapter.getView(i, null, listView);
-            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            height += listItem.getMeasuredHeight();
-        }
-        ViewGroup.LayoutParams layoutParams = listView.getLayoutParams();
-        layoutParams.height = height + (listView.getDividerHeight() * (adapter.getCount() - 1));
-        listView.setLayoutParams(layoutParams);
-        listView.requestLayout();
+
+    private void API_GetListBookedByTable(int tableID){
+        ApiClient.getApiClient().create(ApiInterface.class).getListBookedByTable(tableID).enqueue(new Callback<List<FoodOrderItem>>() {
+            @Override
+            public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
+                responseList = (ArrayList<FoodOrderItem>) response.body();
+                Log.e("list size", responseList.size()+"");
+                for (FoodOrderItem i:responseList){
+                    /// thêm tất cả các món từ response vào list booked
+                    arrayFood.add(new FoodOrderItem(i.getDishId(), i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage(), i.getQuantityOrder(),1));
+
+                }
+                Log.e("Get list booked status:", "Success");
+                Log.e("get status", response+"");
+
+                adapter.notifyDataSetChanged();
+
+            }
+
+            @Override
+            public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
+                Log.e("Get list booked status:", "Failed"+ t);
+            }
+        });
+    }
+    private void API_UpdateTableStatus(String tableID, Table tableUpdate){
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), tableUpdate).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    // hubConnection.send("ChangeTableState",table_Id - 1, 0);
+                    Toast.makeText(Order.this, "Đặt món thành công", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(Order.this, "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(Order.this, "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void API_CreateOrder(CreateOrder order){
+        ApiClient.getApiClient().create(ApiInterface.class).createOrder(order).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    if ((response.code() == 200) && response.body().string().equals("1")){
+                        Log.e("Create order status :", "Ok");
+                    }
+                    else {
+                        Log.e("Create order status :", "Not Ok with code" + response.code());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("Create order status :", "Not Ok with throw" + t.toString());
+            }
+        });
+    }
+    private void API_PostNewOrderDetail(ArrayList<FoodOrderItem> postArray){
+        ApiClient.getApiClient().create(ApiInterface.class).postOrder(postArray).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    if(response.code() == 200 && response.body().string().equals("1")){
+                        Log.e("post order status: ", "ok");
+                        orderStatus = "Đặt món thành công";
+
+                    }
+                    else {
+                        Log.e("post order status: ", "err with code: "+response.code());
+
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("post order failed: ", t+"");
+                orderStatus= "Có lỗi xảy ra. Vui lòng thử lại sau.";
+            }
+        });
     }
 }

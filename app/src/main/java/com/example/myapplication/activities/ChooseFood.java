@@ -103,7 +103,7 @@ public class ChooseFood extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intentSendFoodToOrderActivity = new Intent(ChooseFood.this, Order.class);
                 MenuFoodItem item = new MenuFoodItem(menuItemArrayList.get(position).getDishId(),menuItemArrayList.get(position).getDishName(), menuItemArrayList.get(position).getPrice(),menuItemArrayList.get(position).getDishTypeId(), menuItemArrayList.get(position).getImage());
-                intentSendFoodToOrderActivity.putExtra("abc", (Serializable) item);
+                intentSendFoodToOrderActivity.putExtra("itemChosenAtChooseFood", (Serializable) item);
                 setResult(Activity.RESULT_OK, intentSendFoodToOrderActivity);
                 finish();
             }

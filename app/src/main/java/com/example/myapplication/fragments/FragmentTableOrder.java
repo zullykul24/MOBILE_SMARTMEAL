@@ -46,8 +46,6 @@ public class FragmentTableOrder extends Fragment {
     private String COLOR_BOOKED;
     private String COLOR_EMPTY;
     private ArrayList<Table> responseList;
-
-
     ArrayList<Table> tableArrayList;
     public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
         getActivity().getMenuInflater().inflate(R.menu.set_table_status, menu);
@@ -62,57 +60,14 @@ public class FragmentTableOrder extends Fragment {
             case R.id.status_booked:
                 if (tableArrayList.get(info.position).getStatus() == 0) {
                     tableArrayList.get(info.position).setStatus(-1);
-
-                    ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            Log.e("rspcode", response.code()+"");
-                            if(response.code() == 200){
-                                hubConnection.send("ChangeTableState",info.position, -1);
-                                Toast.makeText(getContext(), "Đặt trước thành công", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-
-                    ///why is this toast not shown?
+                    APi_UpdateTableStatusBooked(info);
                     return true;
                 }
                 else return false;
-                // ??? : sau nay se phai sua cai nayf
             case R.id.status_empty:
                 if (tableArrayList.get(info.position).getStatus() == -1) {
-                    /*
-                    database.QueryData("update group_table set status = 'Empty'  where tableId = " + tableItemArrayList.get(info.position).getId() + ";");
-                    */
                     tableArrayList.get(info.position).setStatus(0);
-                    ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if(response.code() == 200){
-                                hubConnection.send("ChangeTableState",info.position, 0);
-                                Toast.makeText(getContext(), "Bàn trống thành công", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
-
-                    //why is this toast not shown?
+                    API_UpdateTableStatusEmpty(info);
                     return true;
                 }
                 else return false;
@@ -132,47 +87,14 @@ public class FragmentTableOrder extends Fragment {
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"changeTableStateHub").build();
         hubConnection.start();
         Account account = DataLocalManager.getLoggedinAccount();
-
-
-
-
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
         tableArrayList = new ArrayList<>();
         tableItemAdapter = new TableItemAdapter(getContext(), R.layout.table_item, tableArrayList);
 
-        ApiClient.getApiClient().create(ApiInterface.class).getListTable().enqueue(new Callback<List<Table>>() {
-            @Override
-            public void onResponse(Call<List<Table>> call, Response<List<Table>> response) {
-                responseList = (ArrayList<Table>) response.body();
-                for (Table i:responseList){
-                    /// thêm tất cả các món từ response vào menuItemArrayList
-                    tableArrayList.add(new Table(i.getTableId(),i.getSeatAmount(), i.getStatus()));
-                }
-                for(Table i: tableArrayList){
-                    if(i.getStatus() == 1){
-                        i.setColor(COLOR_FILLED);
-                    }
-                    else if(i.getStatus() == -1){
-                        i.setColor(COLOR_BOOKED);
-                    }
-                    else
-                    {
-                        i.setColor(COLOR_EMPTY);
-                    }
-                }
-                gridViewTable.setAdapter(tableItemAdapter);
-
-            }
-
-            @Override
-            public void onFailure(Call<List<Table>> call, Throwable t) {
-                Log.e("Get list tables status:", "Failed"+ t);
-            }
-        });
+        API_GetListTables();
 
         tableItemAdapter.notifyDataSetChanged();
 
-        //tableItemAdapter.notifyDataSetChanged();
 
         /////
         hubConnection.on("ReceiveTableState", (tableId, tag) ->{
@@ -222,15 +144,15 @@ public class FragmentTableOrder extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode==114&& resultCode == 291){
+            //WHY THIS TOAST IS NOT SHOWN?
+            Toast.makeText(getContext().getApplicationContext(), data.getStringExtra("orderStatus"), Toast.LENGTH_SHORT).show();
             for(Table i: tableArrayList){
                 if(i.getTableId() == data.getIntExtra("banId", 1)){
+
                     //i.setColor(COLOR_FILLED);
                   //  hubConnection.send("ChangeTableState",i.getTableId() -1, 1);
                 }
             }
-            ///reload fragment
-           // FragmentTransaction ft = getFragmentManager().beginTransaction();
-           // ft.replace(R.id.fragment_container,new FragmentTableOrder()).addToBackStack(null).commit();
         }
     }
 
@@ -238,5 +160,74 @@ public class FragmentTableOrder extends Fragment {
     public void onStop() {
         super.onStop();
         hubConnection.close();
+    }
+    private void API_GetListTables(){
+        ApiClient.getApiClient().create(ApiInterface.class).getListTable().enqueue(new Callback<List<Table>>() {
+            @Override
+            public void onResponse(Call<List<Table>> call, Response<List<Table>> response) {
+                responseList = (ArrayList<Table>) response.body();
+                for (Table i:responseList){
+                    /// thêm tất cả các món từ response vào menuItemArrayList
+                    tableArrayList.add(new Table(i.getTableId(),i.getSeatAmount(), i.getStatus()));
+                }
+                for(Table i: tableArrayList){
+                    if(i.getStatus() == 1){
+                        i.setColor(COLOR_FILLED);
+                    }
+                    else if(i.getStatus() == -1){
+                        i.setColor(COLOR_BOOKED);
+                    }
+                    else
+                    {
+                        i.setColor(COLOR_EMPTY);
+                    }
+                }
+                gridViewTable.setAdapter(tableItemAdapter);
+
+            }
+
+            @Override
+            public void onFailure(Call<List<Table>> call, Throwable t) {
+                Log.e("Get list tables status:", "Failed"+ t);
+            }
+        });
+    }
+    private void API_UpdateTableStatusEmpty(AdapterView.AdapterContextMenuInfo info){
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    hubConnection.send("ChangeTableState",info.position, 0);
+                    Toast.makeText(getContext(), "Bàn trống thành công", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+    private void APi_UpdateTableStatusBooked(AdapterView.AdapterContextMenuInfo info){
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.e("rspcode", response.code()+"");
+                if(response.code() == 200){
+                    hubConnection.send("ChangeTableState",info.position, -1);
+                    Toast.makeText(getContext(), "Đặt trước thành công", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getContext(), "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

@@ -7,11 +7,13 @@ public class FoodOrderItem extends MenuFoodItem implements Serializable {
     private int quantityOrder;
     private int accountId;
     private int tableId;
+    private int isBooked = 0;
 
 
-    public FoodOrderItem(int dishId, String dish_name, int price, int dishType_id, String image, int quantityOrder) {
+    public FoodOrderItem(int dishId, String dish_name, int price, int dishType_id, String image, int quantityOrder, int isBooked) {
         super(dishId, dish_name, price, dishType_id, image);
         this.quantityOrder = quantityOrder;
+        this.isBooked = isBooked;
     }
     public FoodOrderItem(int tableId, int dishId, int accountId, int quantityOrder){
         super(dishId, "",0,0,"");
@@ -21,6 +23,13 @@ public class FoodOrderItem extends MenuFoodItem implements Serializable {
         this.quantityOrder = quantityOrder;
     }
 
+    public int getIsBooked() {
+        return isBooked;
+    }
+
+    public void setIsBooked(int isBooked) {
+        this.isBooked = isBooked;
+    }
 
     public int getAccountId() {
         return accountId;

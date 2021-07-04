@@ -73,37 +73,41 @@ public class FoodOrderItemAdapter extends BaseAdapter {
         String priceString = df.format(menu.getPrice());
         holder.price.setText(priceString+"đ");
         holder.number.setText(Integer.toString(menu.getQuantityOrder()));
-        holder.plusBtn.setImageResource(R.drawable.plus);
-        holder.minusBtn.setImageResource(R.drawable.minus);
+        if(menu.getIsBooked() == 0){
+            holder.plusBtn.setVisibility(View.VISIBLE);
+            holder.minusBtn.setVisibility(View.VISIBLE);
+            holder.plusBtn.setImageResource(R.drawable.plus);
+            holder.minusBtn.setImageResource(R.drawable.minus);
+            holder.minusBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (menu.getQuantityOrder() > 1){
+                        menu.setQuantityOrder(menu.getQuantityOrder()-1);
 
-        String imgUrl = menu.getImage();
-        Picasso.with(context).load(imgUrl).into(holder.image);
-
-
-        holder.minusBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (menu.getQuantityOrder() > 1){
-                    menu.setQuantityOrder(menu.getQuantityOrder()-1);
+                    }
+                    holder.number.setText(Integer.toString(menu.getQuantityOrder()));
 
                 }
-                holder.number.setText(Integer.toString(menu.getQuantityOrder()));
+            });
 
-            }
-        });
+            holder.plusBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
-        holder.plusBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                menu.setQuantityOrder(menu.getQuantityOrder()+1);
+                    menu.setQuantityOrder(menu.getQuantityOrder()+1);
 
 
-                holder.number.setText(Integer.toString(menu.getQuantityOrder()));
+                    holder.number.setText(Integer.toString(menu.getQuantityOrder()));
 
-            }
-        });
-
+                }
+            });
+        }
+        else {
+            holder.plusBtn.setVisibility(View.INVISIBLE);
+            holder.minusBtn.setVisibility(View.INVISIBLE);
+        }
+        String imgUrl = menu.getImage();
+        Picasso.with(context).load(imgUrl).into(holder.image);
         return convertView;
     }
 }
