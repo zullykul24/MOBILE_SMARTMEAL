@@ -22,6 +22,11 @@ public class FoodOrderItem extends MenuFoodItem implements Serializable {
         this.tableId = tableId;
         this.quantityOrder = quantityOrder;
     }
+    public FoodOrderItem(int dishId, int tableId, String dishName, int quantityOrder, String image, int dishTypeId){
+        super(dishId, dishName,0, dishTypeId, image);
+        this.tableId = tableId;
+        this.quantityOrder = quantityOrder;
+    }
 
     public int getIsBooked() {
         return isBooked;

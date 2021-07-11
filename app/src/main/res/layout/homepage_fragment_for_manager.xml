@@ -66,7 +66,24 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent">
-
+                <ImageButton
+                    android:id="@+id/kitchen_food_btn"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/add_food"
+                    android:scaleType="fitCenter"
+                    android:background="@drawable/home_item"
+                    ></ImageButton>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Món yêu cầu"
+                    android:layout_below="@id/kitchen_food_btn"
+                    android:layout_alignLeft="@id/kitchen_food_btn"
+                    android:layout_alignRight="@id/kitchen_food_btn"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:layout_height="wrap_content"></TextView>
 
             </RelativeLayout>
             <RelativeLayout
@@ -74,26 +91,21 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent">
                 <ImageButton
-                    android:id="@+id/manager_add_table_btn"
+                    android:id="@+id/kitchen_drink_ordered"
                     android:layout_width="70dp"
                     android:layout_height="70dp"
                     android:layout_centerHorizontal="true"
-
-
-
                     android:src="@drawable/new_table2"
                     android:scaleType="fitCenter"
-
-
                     android:background="@drawable/home_item"
                     ></ImageButton>
                 <TextView
                     android:layout_width="wrap_content"
-                    android:text="Thêm bàn"
+                    android:text="Đồ uống yêu cầu"
 
-                    android:layout_below="@id/manager_add_table_btn"
-                    android:layout_alignLeft="@id/manager_add_table_btn"
-                    android:layout_alignRight="@id/manager_add_table_btn"
+                    android:layout_below="@id/kitchen_drink_ordered"
+                    android:layout_alignLeft="@id/kitchen_drink_ordered"
+                    android:layout_alignRight="@id/kitchen_drink_ordered"
                     android:gravity="center"
                     android:textSize="13sp"
                     android:layout_height="wrap_content"></TextView>

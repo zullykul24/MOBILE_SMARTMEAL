@@ -5,13 +5,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -91,8 +87,10 @@ public class Order extends AppCompatActivity {
             API_GetListBookedByTable(table_Id);
         }
 
-        adapter = new FoodOrderItemAdapter(Order.this, R.layout.food_order_item,arrayFood);
+        adapter = new FoodOrderItemAdapter(Order.this, R.layout.item_food_order,arrayFood);
+
         listViewFood.setAdapter(adapter);
+
 
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,10 +98,10 @@ public class Order extends AppCompatActivity {
                 if(!arrayListChosenFood.isEmpty()){
                     if(table_Status == 0 || table_Status == -1 ){
 
-                        Table table = new Table(0,0,1);
+
 
                         /// set status to 1 (is being served)
-                        API_UpdateTableStatus(String.valueOf(table_Id), table);
+                        API_UpdateTableStatus(String.valueOf(table_Id), "1");
 
 
                         //// create new order
@@ -111,8 +109,13 @@ public class Order extends AppCompatActivity {
                         API_CreateOrder(order);
                     }
                     //just post necessary info
-                    for(FoodOrderItem item:arrayListChosenFood){
-                        arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(), DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
+                    for(FoodOrderItem item:arrayFood) {
+                        if(item.getIsBooked() == 0)
+                        {
+                            arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(),
+                                    DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
+                        }
+
                     }
                     ///post new orderdetails
                     API_PostNewOrderDetail(arrayListPost);
@@ -163,9 +166,10 @@ public class Order extends AppCompatActivity {
                 MenuFoodItem foodItem = (MenuFoodItem) data.getSerializableExtra("itemChosenAtChooseFood");
 
                 arrayFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1,0));
+
                 arrayListChosenFood.add(new FoodOrderItem(foodItem.getDishId(), foodItem.getDishName(),foodItem.getPrice(),  foodItem.getDishTypeId(), foodItem.getImage(), 1,0));
 
-                listViewFood.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
                 // Thêm trượt để xoá https://github.com/baoyongzhang/SwipeMenuListView
                 SwipeMenuCreator creator = new SwipeMenuCreator() {
 
@@ -234,8 +238,8 @@ public class Order extends AppCompatActivity {
             }
         });
     }
-    private void API_UpdateTableStatus(String tableID, Table tableUpdate){
-        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), tableUpdate).enqueue(new Callback<ResponseBody>() {
+    private void API_UpdateTableStatus(String tableID, String status){
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), status).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){

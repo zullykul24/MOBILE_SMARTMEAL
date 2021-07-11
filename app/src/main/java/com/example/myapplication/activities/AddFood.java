@@ -76,10 +76,10 @@ public class AddFood extends AppCompatActivity {
                 public void onCheckedChanged(RadioGroup group, int checkedId) {
                     switch (checkedId){
                         case R.id.type_food:
-                            dishType = 0;
+                            dishType = 1;
                             break;
                         case R.id.type_drink:
-                            dishType = 1;
+                            dishType = 0;
                             break;
                     }
                 }

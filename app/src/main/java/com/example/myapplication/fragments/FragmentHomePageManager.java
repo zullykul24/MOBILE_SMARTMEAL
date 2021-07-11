@@ -18,6 +18,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.AddFood;
+import com.example.myapplication.activities.KitchenDrink;
+import com.example.myapplication.activities.KitchenFood;
 import com.example.myapplication.activities.NewFood;
 import com.example.myapplication.activities.Payment;
 import com.example.myapplication.data_local.DataLocalManager;
@@ -25,7 +27,8 @@ import com.example.myapplication.models.Account;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class FragmentHomePageManager extends Fragment {
-    ImageButton addFoodBtn, addTableBtn, newFoodBtn, paymentBtn, historyBtn, menuFoodBtn;
+    ImageButton addFoodBtn, kitchenDrinkBtn, newFoodBtn, paymentBtn, historyBtn, menuFoodBtn;
+    ImageButton kitchenFoodBtn;
     BottomNavigationView navbar;
     @Nullable
     @Override
@@ -33,17 +36,21 @@ public class FragmentHomePageManager extends Fragment {
         final View rootView =  inflater.inflate(R.layout.homepage_fragment_for_manager, container, false);
         ///// ánh xạ
         addFoodBtn = rootView.findViewById(R.id.manager_add_food_btn);
-        addTableBtn = rootView.findViewById(R.id.manager_add_table_btn);
+
+
         newFoodBtn = rootView.findViewById(R.id.manage_new_food);
         paymentBtn = rootView.findViewById(R.id.manager_payment);
         historyBtn = rootView.findViewById(R.id.manager_payment);
         menuFoodBtn = rootView.findViewById(R.id.menuFood);
+        kitchenFoodBtn = rootView.findViewById(R.id.kitchen_food_btn);
+        kitchenDrinkBtn = rootView.findViewById(R.id.kitchen_drink_ordered);
+
         final FragmentManager fragmentManager = getFragmentManager();
         Account account = DataLocalManager.getLoggedinAccount();
         ////
         /// glide để bo góc ảnh
         Glide.with(this).load(R.drawable.new_food).circleCrop().into(newFoodBtn);
-        Glide.with(this).load(R.drawable.new_table2).circleCrop().into(addTableBtn);
+        Glide.with(this).load(R.drawable.new_table2).circleCrop().into(kitchenDrinkBtn);
         Glide.with(this).load(R.drawable.history).circleCrop().into(historyBtn);
         Glide.with(this).load(R.drawable.food_menu).circleCrop().into(menuFoodBtn);
         navbar = (BottomNavigationView) getActivity().findViewById(R.id.navbar);
@@ -77,6 +84,24 @@ public class FragmentHomePageManager extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), NewFood.class);
+                startActivity(intent);
+            }
+        });
+
+        // món đã đặt, nhà bếp làm theo yêu cầu, dành cho role Kitchen staff
+        kitchenFoodBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), KitchenFood.class);
+                startActivity(intent);
+            }
+        });
+
+        // đồ uống đã đặt, nhà bếp làm theo yêu cầu, dành cho role Kitchen staff
+        kitchenDrinkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), KitchenDrink.class);
                 startActivity(intent);
             }
         });

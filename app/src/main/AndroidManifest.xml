@@ -26,8 +26,10 @@
         <activity android:name=".activities.AddFood"/>
         <activity android:name=".activities.NewFood"/>
         <activity android:name=".activities.Payment"/>
+        <activity android:name=".activities.KitchenFood"></activity>
         <activity android:name=".activities.PayBill"/>
         <activity android:name=".activities.Order"/>
+        <activity android:name=".activities.KitchenDrink"/>
         <activity android:name=".activities.ChooseFood"/>
 
     </application>

@@ -62,7 +62,7 @@
                 android:dividerHeight="5.0sp"
                 tools:listfooter="@layout/footer"
 
-                tools:listitem="@layout/food_order_item">
+                tools:listitem="@layout/item_food_order">
             </com.baoyz.swipemenulistview.SwipeMenuListView>/>
 
 

@@ -36,7 +36,7 @@ import retrofit2.http.Path;
         Call<List<Table>> getListTable();
 
         @PUT("Table/{id}")
-        Call<ResponseBody> updateTableStatus(@Path("id") String id, @Body Table table);
+        Call<ResponseBody> updateTableStatus(@Path("id") String id, @Body String status);
 
         @GET("Dish/Table/{tableId}")
         Call<List<FoodOrderItem>> getListBookedByTable(@Path("tableId") int tableId);
@@ -46,5 +46,8 @@ import retrofit2.http.Path;
 
         @POST("Orders")
         Call<ResponseBody> createOrder(@Body CreateOrder order);
+
+        @GET("OrderDetail/isOrdered")
+        Call<List<FoodOrderItem>> getListOrdered();
     }
 

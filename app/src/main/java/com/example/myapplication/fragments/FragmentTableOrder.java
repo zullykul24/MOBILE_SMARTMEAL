@@ -193,7 +193,7 @@ public class FragmentTableOrder extends Fragment {
         });
     }
     private void API_UpdateTableStatusEmpty(AdapterView.AdapterContextMenuInfo info){
-        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), "0").enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
@@ -212,7 +212,7 @@ public class FragmentTableOrder extends Fragment {
 
     }
     private void APi_UpdateTableStatusBooked(AdapterView.AdapterContextMenuInfo info){
-        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), tableArrayList.get(info.position)).enqueue(new Callback<ResponseBody>() {
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(info.position+1), "-1").enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.e("rspcode", response.code()+"");
