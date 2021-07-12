@@ -49,5 +49,11 @@ import retrofit2.http.Path;
 
         @GET("OrderDetail/isOrdered")
         Call<List<FoodOrderItem>> getListOrdered();
+
+        @GET("OrderDetail/isReady")
+        Call<List<FoodOrderItem>> getListReady();
+
+        @PUT("OrderDetail/OrderDetailId/{orderDetailId}")
+        Call<ResponseBody> putDishReady(@Path("orderDetailId") int orderDetailId, @Body String status);
     }
 

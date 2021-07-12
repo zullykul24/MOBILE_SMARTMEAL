@@ -22,6 +22,7 @@ import com.example.myapplication.activities.KitchenDrink;
 import com.example.myapplication.activities.KitchenFood;
 import com.example.myapplication.activities.NewFood;
 import com.example.myapplication.activities.Payment;
+import com.example.myapplication.activities.WaiterFoodReady;
 import com.example.myapplication.data_local.DataLocalManager;
 import com.example.myapplication.models.Account;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,6 +30,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 public class FragmentHomePageManager extends Fragment {
     ImageButton addFoodBtn, kitchenDrinkBtn, newFoodBtn, paymentBtn, historyBtn, menuFoodBtn;
     ImageButton kitchenFoodBtn;
+    ImageButton readyFoodBtn;
     BottomNavigationView navbar;
     @Nullable
     @Override
@@ -41,6 +43,12 @@ public class FragmentHomePageManager extends Fragment {
         newFoodBtn = rootView.findViewById(R.id.manage_new_food);
         paymentBtn = rootView.findViewById(R.id.manager_payment);
         historyBtn = rootView.findViewById(R.id.manager_payment);
+
+
+        // for waiter
+        readyFoodBtn = rootView.findViewById(R.id.waiter_ready_food);
+        //
+
         menuFoodBtn = rootView.findViewById(R.id.menuFood);
         kitchenFoodBtn = rootView.findViewById(R.id.kitchen_food_btn);
         kitchenDrinkBtn = rootView.findViewById(R.id.kitchen_drink_ordered);
@@ -53,6 +61,12 @@ public class FragmentHomePageManager extends Fragment {
         Glide.with(this).load(R.drawable.new_table2).circleCrop().into(kitchenDrinkBtn);
         Glide.with(this).load(R.drawable.history).circleCrop().into(historyBtn);
         Glide.with(this).load(R.drawable.food_menu).circleCrop().into(menuFoodBtn);
+
+
+        // for waiter
+        Glide.with(this).load(R.drawable.new_food).circleCrop().into(readyFoodBtn);
+        //
+
         navbar = (BottomNavigationView) getActivity().findViewById(R.id.navbar);
         ////
         /// thêm món
@@ -60,6 +74,15 @@ public class FragmentHomePageManager extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intentFood = new Intent(getActivity(), AddFood.class);
+                startActivity(intentFood);
+            }
+        });
+
+        //các món bếp đã làm xong
+        readyFoodBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intentFood = new Intent(getActivity(), WaiterFoodReady.class);
                 startActivity(intentFood);
             }
         });

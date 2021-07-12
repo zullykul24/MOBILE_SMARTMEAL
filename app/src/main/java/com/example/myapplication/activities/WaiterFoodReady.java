@@ -2,6 +2,7 @@ package com.example.myapplication.activities;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -9,12 +10,12 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
+
 import com.example.myapplication.adapters.KitchenFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
@@ -28,29 +29,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class KitchenDrink extends AppCompatActivity {
-    ListView kitchenOrderedDrinkListView;
+public class WaiterFoodReady extends AppCompatActivity {
+    ListView kitchenOrderedFoodListView;
     ImageButton backToMain;
-    ArrayList<FoodOrderItem> foodOrderItemArrayList, responseList;
+    ArrayList<FoodOrderItem> foodReadyItemArrayList, responseList;
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kitchen_drink);
-        kitchenOrderedDrinkListView = (ListView)findViewById(R.id.ordered_drinklistview);
-        backToMain = (ImageButton)findViewById(R.id.img_back_btn_from_kitchen_ordered_drink);
-        foodOrderItemArrayList = new ArrayList<>();
-
-
-        adapter = new KitchenFoodItemAdapter(KitchenDrink.this,  R.layout.item_kitchen_ordered_food, foodOrderItemArrayList);
-
-
-        // call api to get list orderdetails drink ordered
-        API_GetListDrinkOrdered();
-
-        kitchenOrderedDrinkListView.setAdapter(adapter);
+        setContentView(R.layout.activity_waiter_food_ready);
+        kitchenOrderedFoodListView = findViewById(R.id.ready_food_listview);
+        backToMain = findViewById(R.id.img_back_btn_from_ready_food);
 
 
         // click to back to main activity
@@ -60,9 +51,25 @@ public class KitchenDrink extends AppCompatActivity {
                 finish();
             }
         });
+        /////
 
-        ///click when kitchen staff finish the dishes and the waiter 
-        kitchenOrderedDrinkListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        foodReadyItemArrayList = new ArrayList<>();
+        ///
+        // call api to get list orderdetails ordered
+        API_GetListReady();
+
+        //
+        adapter = new KitchenFoodItemAdapter(WaiterFoodReady.this, R.layout.item_kitchen_ordered_food,foodReadyItemArrayList);
+        kitchenOrderedFoodListView.setAdapter(adapter);
+
+
+
+
+        ///
+
+
+
+        kitchenOrderedFoodListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ShowDialog(position);
@@ -72,16 +79,17 @@ public class KitchenDrink extends AppCompatActivity {
 
 
 
+
     }
     private void ShowDialog(final int position){
-        builder = new AlertDialog.Builder(KitchenDrink.this);
-        builder.setMessage("Món đã sẵn sàng?");
+        builder = new AlertDialog.Builder(WaiterFoodReady.this);
+        builder.setMessage("Món đã được phục vụ?");
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //Toast.makeText(KitchenDrink.this, foodOrderItemArrayList.get(position).getDishName(), Toast.LENGTH_LONG).show();
-                API_PutDishReady(foodOrderItemArrayList.get(position).getOrderDetailId());
+                // Toast.makeText(KitchenFood.this, foodReadyItemArrayList.get(position).getDishName(), Toast.LENGTH_LONG).show();
+                API_PutDishServed(foodReadyItemArrayList.get(position).getOrderDetailId());
             }
         });
         builder.setNegativeButton("HUỶ", new DialogInterface.OnClickListener() {
@@ -92,48 +100,48 @@ public class KitchenDrink extends AppCompatActivity {
         });
         builder.show();
     }
-    private void API_PutDishReady(int orderDetailId) {
-        ApiClient.getApiClient().create(ApiInterface.class).putDishReady(orderDetailId, "1").enqueue(new Callback<ResponseBody>() {
+
+    private void API_PutDishServed(int orderDetailId) {
+        ApiClient.getApiClient().create(ApiInterface.class).putDishReady(orderDetailId, "2").enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
                     /////
                 } else {
-                    Toast.makeText(KitchenDrink.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(WaiterFoodReady.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(KitchenDrink.this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                Toast.makeText(WaiterFoodReady.this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
                 Log.e("PutDishReady failed: ", t.toString());
             }
         });
     }
 
-    private void API_GetListDrinkOrdered() {
-        ApiClient.getApiClient().create(ApiInterface.class).getListOrdered().enqueue(new Callback<List<FoodOrderItem>>() {
+
+    private void API_GetListReady() {
+        ApiClient.getApiClient().create(ApiInterface.class).getListReady().enqueue(new Callback<List<FoodOrderItem>>() {
             @Override
             public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
                 if(response.code() == 200){
                     responseList = (ArrayList<FoodOrderItem>) response.body();
                     for(FoodOrderItem item:responseList){
-                        if(item.getDishTypeId() == 0){
-                            foodOrderItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(), ApiClient.BASE_URL +"Image/"+item.getImage(), 0, item.getOrderDetailId()));
-                        }
-
+                            foodReadyItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(),
+                                    ApiClient.BASE_URL +"Image/"+item.getImage(), 1, item.getOrderDetailId()));
                     }
                     adapter.notifyDataSetChanged();
                 }
                 else
                 {
-                    Toast.makeText(KitchenDrink.this, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WaiterFoodReady.this, "Có lỗi xảy ra", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
-                Toast.makeText(KitchenDrink.this, "Có lỗi xảy ra. Vui lòng thử lại", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WaiterFoodReady.this, "Có lỗi xảy ra. Vui lòng thử lại", Toast.LENGTH_SHORT).show();
                 Log.e("failure: ", t.toString());
             }
         });

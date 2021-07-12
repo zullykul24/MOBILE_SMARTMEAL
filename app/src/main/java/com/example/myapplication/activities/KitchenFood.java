@@ -1,14 +1,17 @@
 package com.example.myapplication.activities;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
@@ -21,6 +24,7 @@ import com.example.myapplication.models.FoodOrderItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -30,6 +34,8 @@ public class KitchenFood extends AppCompatActivity {
     ImageButton backToMain;
     ArrayList<FoodOrderItem> foodOrderItemArrayList, responseList;
     KitchenFoodItemAdapter adapter;
+    AlertDialog dialog;
+    AlertDialog.Builder builder;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +62,64 @@ public class KitchenFood extends AppCompatActivity {
         adapter = new KitchenFoodItemAdapter(KitchenFood.this, R.layout.item_kitchen_ordered_food,foodOrderItemArrayList);
         kitchenOrderedFoodListView.setAdapter(adapter);
 
+
+
+
+        ///
+
+
+
+        kitchenOrderedFoodListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                   ShowDialog(position);
+
+            }
+        });
+
+
+
+
     }
+    private void ShowDialog(final int position){
+        builder = new AlertDialog.Builder(KitchenFood.this);
+        builder.setMessage("Món đã sẵn sàng?");
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+               // Toast.makeText(KitchenFood.this, foodOrderItemArrayList.get(position).getDishName(), Toast.LENGTH_LONG).show();
+                API_PutDishReady(foodOrderItemArrayList.get(position).getOrderDetailId());
+            }
+        });
+        builder.setNegativeButton("HUỶ", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        builder.show();
+    }
+
+    private void API_PutDishReady(int orderDetailId) {
+        ApiClient.getApiClient().create(ApiInterface.class).putDishReady(orderDetailId, "1").enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    /////
+                } else {
+                    Toast.makeText(KitchenFood.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(KitchenFood.this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                Log.e("PutDishReady failed: ", t.toString());
+            }
+        });
+    }
+
 
     private void API_GetListOrdered() {
         ApiClient.getApiClient().create(ApiInterface.class).getListOrdered().enqueue(new Callback<List<FoodOrderItem>>() {
@@ -66,7 +129,8 @@ public class KitchenFood extends AppCompatActivity {
                     responseList = (ArrayList<FoodOrderItem>) response.body();
                     for(FoodOrderItem item:responseList){
                         if(item.getDishTypeId() == 1){
-                            foodOrderItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(), ApiClient.BASE_URL +"Image/"+item.getImage(), 1));
+                            foodOrderItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(),
+                                    ApiClient.BASE_URL +"Image/"+item.getImage(), 1, item.getOrderDetailId()));
                         }
 
                     }

@@ -154,7 +154,27 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent">
+                <ImageButton
+                    android:id="@+id/waiter_ready_food"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_centerHorizontal="true"
 
+                    android:background="@drawable/home_item"
+                    android:src="@drawable/new_food"
+
+                    android:scaleType="fitCenter"
+                    android:textSize="13sp"
+                    ></ImageButton>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Món sẵn sàng"
+                    android:layout_below="@id/waiter_ready_food"
+                    android:layout_alignLeft="@id/waiter_ready_food"
+                    android:layout_alignRight="@id/waiter_ready_food"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:layout_height="wrap_content"></TextView>
             </RelativeLayout>
             <RelativeLayout
                 android:layout_width="0dp"
