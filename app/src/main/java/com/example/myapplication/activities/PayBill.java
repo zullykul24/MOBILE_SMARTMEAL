@@ -8,38 +8,41 @@ import android.widget.Button;
 
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.PayBillItemAdapter;
+import com.example.myapplication.api.ApiClient;
+import com.example.myapplication.api.ApiInterface;
+import com.example.myapplication.data_local.DataLocalManager;
+import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.PayBillItem;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PayBill extends AppCompatActivity {
     int tableId;
-    TextView staffId;
+    TextView cashierName, tableIdText;
     TextView paymentId;
     TextView date_paymented;
     TextView totalPriceText;
     TextView tablename;
     Button btn_pay;
     int orderId;
-    double total;
-    double money_discount=0;
-    int voucherId = 0;
-    double so_tien =0;
-
-    public void setTotal(double total) {
-        this.total = total;
-    }
-
-    public double getTotal() {
-        return this.total;
-    }
+    int totalPrice = 0;
+    ListView listViewPayBill;
+    ArrayList<PayBillItem> payBillItemArrayList;
+    ArrayList<FoodOrderItem> responseList;
+    PayBillItemAdapter payBillItemAdapter;
 
     long millis = System.currentTimeMillis();
     java.sql.Date date =new java.sql.Date(millis);
@@ -47,88 +50,80 @@ public class PayBill extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_paybill);
-        ListView listViewPayBill;
-        ArrayList<PayBillItem> payBillItemArrayList;
-        PayBillItemAdapter payBillItemAdapter;
-
         totalPriceText = (TextView)findViewById(R.id.total_price);
-
-
-        staffId = (TextView) findViewById(R.id.idNhanVien);
+        tableIdText = (TextView)findViewById(R.id.tableId);
+        cashierName = (TextView) findViewById(R.id.cashier_name);
         paymentId = (TextView) findViewById(R.id.paymentId);
         date_paymented = (TextView) findViewById(R.id.date_paymented);
         tablename = (TextView)  findViewById(R.id.text_paybill_table);
         btn_pay = (Button) findViewById(R.id.btn_thanh_toan);
+        listViewPayBill = (ListView)findViewById(R.id.listview_pay_bill);
+        tableId = getIntent().getIntExtra("tableId", 0);
+        orderId = getIntent().getIntExtra("orderId", 0);
+        tableIdText.setText(tableId+"");
+        paymentId.setText(orderId + "");
 
-        total = 0;
-        tableId = getIntent().getIntExtra("BanTen", 1);
-//        // làm paymentId trước nhá
-       /* Cursor cursor1  = database.getData("select max(paymentid) from payments;");
-        if(cursor1.getCount()>0){
-            while (cursor1.moveToNext()){
-                paymentId.setText(""+ (cursor1.getInt(0)+1));
-            }
-        }else{
-            paymentId.setText("1");
-        }
-        */
+        cashierName.setText(DataLocalManager.getLoggedinAccount().getFullName());
 
 ////        // date payment
         date_paymented.setText(""+ date);
-//
-//        // staffId : lấy ra tên nhân viên.
-       /* Cursor cursor2 = database.getData("select * from account where accountId = " + getIntent().getIntExtra("accountId", 1) );
-        while (cursor2.moveToNext()){
-            staffId.setText(cursor2.getString(3));
-        }
-        */
-
-        listViewPayBill = (ListView)findViewById(R.id.listview_pay_bill);
         payBillItemArrayList = new ArrayList<>();
-
         tablename.setText("Bàn số "+ tableId);
-        /*
-        Cursor cursor = database.getData("select dishname, quantityOrder, price, orderdetails.orderId as oId  from orderdetails join orders  on orderdetails.orderId = orders.orderid " +
-                " join dish on orderdetails.dishid = dish.dishid " +
-                "where oId = (select max(orderId) from orders where tableId = "+tableId+")");
-        while(cursor.moveToNext()){
-            payBillItemArrayList.add(new PayBillItem(  cursor.getString(0), cursor.getInt(1), cursor.getDouble(2) ));
-            orderId = cursor.getInt(3);
-        }
-
-         */
-
-        for(int i=0; i< payBillItemArrayList.size();i++){
-            payBillItemArrayList.get(i).setSTT(i+1);
-            so_tien = so_tien + payBillItemArrayList.get(i).getPriceTotal();
-        }
-        total = so_tien;
-
         payBillItemAdapter = new PayBillItemAdapter(PayBill.this, R.layout.item_paybill, payBillItemArrayList);
         listViewPayBill.setAdapter(payBillItemAdapter);
 
-        DecimalFormat df= new DecimalFormat("###,###,###");
-        String priceString = String.valueOf(df.format(Double.valueOf(so_tien)));
-        totalPriceText.setText(priceString);
+        API_GetOrderDetailsPayment(tableId);
+
+
+
         btn_pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 /// SET TRẠNG THÁI ĐÃ THANH TOÁN
-                /*
-                // insert db vao trong co so du lieu
-                    database.QueryData("insert into payments values (null, "+getIntent().getIntExtra("accountId", 1)+" , "+tableId+","+orderId+" ,null, "+total+", "+millis+", 'Paid')");
-                // update lai cai ban la con trong la oke
-                database.QueryData("update group_table set status = 'Empty'  where tableId = "+tableId+";");
-                database.QueryData("update orders set paid = 1 where orderId = " + orderId);
-                // thoat ra khoi man hinh chinh
 
-                 */
-                setResult(RESULT_OK, null);
+                // thoat ra khoi man hinh chinh
                 finish();
             }
         });
         Log.d("checkdate", ""+ date);
 
+    }
+
+    private void API_GetOrderDetailsPayment(int tableDoneId) {
+        ApiClient.getApiClient().create(ApiInterface.class).getListDone(tableDoneId).enqueue(new Callback<List<FoodOrderItem>>() {
+            @Override
+            public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
+                if(response.code() == 200){
+                    responseList = (ArrayList<FoodOrderItem>) response.body();
+                    for(int i = 0; i< responseList.size(); i++){
+                        payBillItemArrayList.add(
+                                new PayBillItem(
+                                        i + 1,
+                                        responseList.get(i).getDishName(),
+                                        responseList.get(i).getQuantityOrder(),
+                                        responseList.get(i).getPrice()
+                                )
+                        );
+                        totalPrice = totalPrice + responseList.get(i).getQuantityOrder() * responseList.get(i).getPrice();
+
+                    }
+                    DecimalFormat df= new DecimalFormat("###,###,###");
+                    String priceString = df.format(totalPrice);
+                    totalPriceText.setText(priceString);
+
+                    payBillItemAdapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(PayBill.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
+                Toast.makeText(PayBill.this, "Không tải được hoá đơn. Vui lòng thử lại sau.",
+                        Toast.LENGTH_LONG).show();
+                Log.e("get orderdetails payment failed: ", t.toString());
+            }
+        });
     }
 
 }

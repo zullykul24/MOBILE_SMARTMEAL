@@ -10,6 +10,11 @@ public class CreateOrder {
         this.tableId = tableId;
         this.status = status;
     }
+    public CreateOrder(CreateOrder order){
+        this.orderId = order.getOrderId();
+        this.tableId = order.getTableId();
+        this.status = order.getStatus();
+    }
 
     public int getOrderId() {
         return orderId;

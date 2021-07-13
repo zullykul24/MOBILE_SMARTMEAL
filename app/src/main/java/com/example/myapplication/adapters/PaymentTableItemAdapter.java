@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.example.myapplication.R;
+import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.PaymentTableItem;
 
 import java.util.List;
@@ -16,13 +17,13 @@ public class PaymentTableItemAdapter extends BaseAdapter {
 
     private Context context;
     private int layout;
-    private List<PaymentTableItem> paymentTableItemList;
+    private List<CreateOrder> paymentTableItemList;
 
     private class ViewHolder{
         TextView name;
 
     }
-    public PaymentTableItemAdapter(Context context, int layout, List<PaymentTableItem> paymentTableItemList) {
+    public PaymentTableItemAdapter(Context context, int layout, List<CreateOrder> paymentTableItemList) {
         this.context = context;
         this.layout = layout;
         this.paymentTableItemList = paymentTableItemList;
@@ -60,8 +61,8 @@ public class PaymentTableItemAdapter extends BaseAdapter {
 
         //gán giá trị
 
-        PaymentTableItem paymentTableItem = paymentTableItemList.get(position);
-        holder.name.setText("Bàn " + paymentTableItem.getTableName());
+        CreateOrder paymentTableItem = paymentTableItemList.get(position);
+        holder.name.setText("Bàn " + paymentTableItem.getTableId());
 
         return convertView;
     }

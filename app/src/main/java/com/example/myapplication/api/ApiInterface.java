@@ -1,5 +1,6 @@
 package com.example.myapplication.api;
 
+import com.example.myapplication.activities.Order;
 import com.example.myapplication.models.Account;
 import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
@@ -55,5 +56,11 @@ import retrofit2.http.Path;
 
         @PUT("OrderDetail/OrderDetailId/{orderDetailId}")
         Call<ResponseBody> putDishReady(@Path("orderDetailId") int orderDetailId, @Body String status);
+
+        @GET("Orders")
+        Call<List<CreateOrder>> getPaymentTables();
+
+        @GET("OrderDetail/GetDishesDone/{tableId}")
+        Call<List<FoodOrderItem>> getListDone(@Path("tableId") int tableId);
     }
 

@@ -20,7 +20,7 @@ public class PayBillItemAdapter extends BaseAdapter {
     private List<PayBillItem> payBillItemList;
 
     private class ViewHolder{
-        TextView STT, dishName, SL, priceEach, priceTotal;
+        TextView STT, dishName, quantityOrder, priceEach, priceTotal;
 
     }
     public PayBillItemAdapter(Context context, int layout, List<PayBillItem> payBillItemList) {
@@ -54,7 +54,7 @@ public class PayBillItemAdapter extends BaseAdapter {
 
             holder.STT = (TextView) convertView.findViewById(R.id.bill_item_stt);
             holder.dishName= (TextView)convertView.findViewById(R.id.bill_item_dish_name);
-            holder.SL = (TextView)convertView.findViewById(R.id.bill_item_sl);
+            holder.quantityOrder = (TextView)convertView.findViewById(R.id.bill_item_sl);
             holder.priceEach = (TextView)convertView.findViewById(R.id.bill_item_price_each);
             holder.priceTotal = (TextView)convertView.findViewById(R.id.bill_item_price_total);
             convertView.setTag(holder);
@@ -65,12 +65,12 @@ public class PayBillItemAdapter extends BaseAdapter {
 
         holder.STT.setText(String.valueOf(payBillItem.getSTT()));
         holder.dishName.setText(payBillItem.getDishName());
-        holder.SL.setText(String.valueOf(payBillItem.getSL()));
+        holder.quantityOrder.setText(String.valueOf(payBillItem.getQuantityOrder()));
         DecimalFormat df= new DecimalFormat("###,###,###");
         //  int i = Integer.valueOf(payBillItem.getPriceEach());
-        String priceEachString = df.format((int)payBillItem.getPriceEach());
+        String priceEachString = df.format(payBillItem.getPrice());
         holder.priceEach.setText(priceEachString);
-        String priceTotalString = df.format((int)payBillItem.getPriceTotal());
+        String priceTotalString = df.format(payBillItem.getPriceTotal());
         holder.priceTotal.setText(priceTotalString);
         return convertView;
     }

@@ -3,15 +3,16 @@ package com.example.myapplication.models;
 public class PayBillItem {
     private int STT;
     private String dishName;
-    private int SL;
-    private double priceEach;
-    private double priceTotal;
+    private int quantityOrder;
+    private int price;
+    private int priceTotal;
 
-    public PayBillItem(int STT, String dishName, int SL, double priceEach) {
+    public PayBillItem(int STT, String dishName, int quantityOrder, int price) {
         this.STT = STT;
         this.dishName = dishName;
-        this.SL = SL;
-        this.priceEach = priceEach;
+        this.quantityOrder = quantityOrder;
+        this.price = price;
+        this.priceTotal = this.quantityOrder * price;
     }
 
     public int getSTT() {
@@ -30,36 +31,31 @@ public class PayBillItem {
         this.dishName = dishName;
     }
 
-    public int getSL() {
-        return SL;
+    public int getQuantityOrder() {
+        return quantityOrder;
     }
 
-    public void setSL(int SL) {
-        this.SL = SL;
+    public void setQuantityOrder(int quantityOrder) {
+        this.quantityOrder = quantityOrder;
     }
 
-    public double getPriceEach() {
-        return priceEach;
+    public int getPrice() {
+        return price;
     }
 
-    public void setPriceEach(double priceEach) {
-        this.priceEach = priceEach;
+    public void setPrice(int price) {
+        this.price = price;
     }
 
-    public double getPriceTotal() {
+    public void setPriceTotal(int priceTotal) {
+        this.priceTotal = priceTotal;
+    }
+
+    public int getPriceTotal() {
         return priceTotal;
     }
 
-    public void setPriceTotal(double priceTota) {
-        this.priceTotal = priceTota;
-    }
 
-    public PayBillItem(String dishName, int SL, double priceEach) {
-        this.dishName = dishName;
-        this.SL = SL;
-        this.priceEach = priceEach;
-        this.priceTotal = this.SL * priceEach;
-    }
 
 
 }
