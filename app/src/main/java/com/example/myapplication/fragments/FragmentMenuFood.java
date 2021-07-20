@@ -107,7 +107,7 @@ public class FragmentMenuFood extends Fragment {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    receivedItem = new MenuFoodItem(0,foodName,foodPrice, dishType, ApiClient.BASE_URL);
+                    receivedItem = new MenuFoodItem(0,foodName,foodPrice, dishType, ApiClient.BASE_URL+"Image/logo_smart_meal.png");
                     menuItemArrayList.add(receivedItem);
                     Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
                     menuFoodItemAdapter.notifyDataSetChanged();
@@ -118,4 +118,6 @@ public class FragmentMenuFood extends Fragment {
         }, String.class, Integer.class, Integer.class);
         return rootView;
     }
+
+
 }

@@ -3,6 +3,7 @@ package com.example.myapplication.activities;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +19,7 @@ import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
+import com.ea.async.Async;
 import com.example.myapplication.R;
 
 import com.example.myapplication.adapters.FoodOrderItemAdapter;
@@ -29,6 +31,9 @@ import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.MenuFoodItem;
 import com.example.myapplication.models.Table;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,6 +43,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static com.ea.async.Async.await;
 
 public class Order extends AppCompatActivity {
     TextView tableName;
@@ -56,6 +63,7 @@ public class Order extends AppCompatActivity {
     java.sql.Date date=new java.sql.Date(millis);
     int table_Id;
     int table_Status;
+    HubConnection hubConnection;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,7 +86,8 @@ public class Order extends AppCompatActivity {
 
         btn_ok = (Button)findViewById(R.id.btn_ok_order);
         btn_cancel = (Button) findViewById(R.id.btn_cancel_order);
-
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        //hubConnectionChangeStatus = HubConnectionBuilder.create(ApiClient.BASE_URL +"changeTableStateHub").build();
 
         arrayFood = new ArrayList<>();
         arrayListChosenFood = new ArrayList<>();
@@ -95,10 +104,9 @@ public class Order extends AppCompatActivity {
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if(!arrayListChosenFood.isEmpty()){
                     if(table_Status == 0 || table_Status == -1 ){
-
-
 
                         /// set status to 1 (is being served)
                         API_UpdateTableStatus(String.valueOf(table_Id), "1");
@@ -118,7 +126,7 @@ public class Order extends AppCompatActivity {
 
                     }
                     ///post new orderdetails
-                    API_PostNewOrderDetail(arrayListPost);
+                   API_PostNewOrderDetail(arrayListPost, table_Id);
                 }
                 // intent back to fragment table order
                 Intent intent = new Intent(Order.this, FragmentTableOrder.class);
@@ -243,7 +251,6 @@ public class Order extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
-                    // hubConnection.send("ChangeTableState",table_Id - 1, 0);
                     Toast.makeText(Order.this, "Đặt món thành công", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(Order.this, "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
@@ -278,7 +285,7 @@ public class Order extends AppCompatActivity {
             }
         });
     }
-    private void API_PostNewOrderDetail(ArrayList<FoodOrderItem> postArray){
+    private void API_PostNewOrderDetail(ArrayList<FoodOrderItem> postArray, int table){
         ApiClient.getApiClient().create(ApiInterface.class).postOrder(postArray).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -286,6 +293,12 @@ public class Order extends AppCompatActivity {
                     if(response.code() == 200 && response.body().string().equals("1")){
                         Log.e("post order status: ", "ok");
                         orderStatus = "Đặt món thành công";
+                        try {
+                            hubConnection.send("ConfirmOrderedFood", table);
+
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
 
                     }
                     else {
@@ -303,5 +316,22 @@ public class Order extends AppCompatActivity {
                 orderStatus= "Có lỗi xảy ra. Vui lòng thử lại sau.";
             }
         });
+        new HubConnectionTask().execute(hubConnection);
+
     }
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
+    }
+
 }

@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,13 +81,49 @@ public class PayBill extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 /// SET TRẠNG THÁI ĐÃ THANH TOÁN
-
-                // thoat ra khoi man hinh chinh
+                API_ConfirmPayment(tableId);
                 finish();
+
             }
         });
         Log.d("checkdate", ""+ date);
 
+    }
+
+    private void API_ConfirmPayment(int tableId0) {
+        ApiClient.getApiClient().create(ApiInterface.class).confirmPayment(String.valueOf(tableId0)).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    Log.e("confirmed", "OK");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PayBill.this, "Xác nhận thanh toán bàn "+String.valueOf(tableId0)+"thành công", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                else {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(PayBill.this, "Xác nhận thanh toán thất bại", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("confirm payment err: ", t.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(PayBill.this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
     }
 
     private void API_GetOrderDetailsPayment(int tableDoneId) {

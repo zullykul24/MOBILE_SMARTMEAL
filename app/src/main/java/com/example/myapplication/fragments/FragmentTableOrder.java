@@ -28,6 +28,7 @@ import com.example.myapplication.models.Account;
 import com.example.myapplication.models.Table;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,8 +85,10 @@ public class FragmentTableOrder extends Fragment {
         COLOR_FILLED = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorFilledTable));
         COLOR_BOOKED = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorBookedTable));
         COLOR_EMPTY = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorEmptyTable));
-        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"changeTableStateHub").build();
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
         hubConnection.start();
+
+
         Account account = DataLocalManager.getLoggedinAccount();
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
         tableArrayList = new ArrayList<>();
@@ -97,29 +100,18 @@ public class FragmentTableOrder extends Fragment {
 
 
         /////
-        hubConnection.on("ReceiveTableState", (tableId, tag) ->{
+        hubConnection.on("ConfirmOrderedFood", (tableId) ->{
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if(tag == 0){
-                        tableArrayList.get(tableId).setStatus(0);
-                        tableArrayList.get(tableId).setColor(COLOR_EMPTY);
-                    }
-                    else if(tag == -1)
-                    {
-                        tableArrayList.get(tableId).setStatus(-1);
-                        tableArrayList.get(tableId).setColor(COLOR_BOOKED);
-                    }
-                    else {
-                        tableArrayList.get(tableId).setStatus(1);
-                        tableArrayList.get(tableId).setColor(COLOR_FILLED);
-                    }
+                        tableArrayList.get(tableId-1).setStatus(1);
+                        tableArrayList.get(tableId-1).setColor(COLOR_FILLED);
                     tableItemAdapter.notifyDataSetChanged();
                 }
             });
 
-            Log.e("ReceiveTableStateMsg",tableId +""+ tag);
-        },Integer.class, Integer.class);
+            Log.e("ConfirmOrderedFood",tableId.toString());
+        },Integer.class);
         ////
         gridViewTable.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -146,21 +138,11 @@ public class FragmentTableOrder extends Fragment {
         if(requestCode==114&& resultCode == 291){
             //WHY THIS TOAST IS NOT SHOWN?
             Toast.makeText(getContext().getApplicationContext(), data.getStringExtra("orderStatus"), Toast.LENGTH_SHORT).show();
-            for(Table i: tableArrayList){
-                if(i.getTableId() == data.getIntExtra("banId", 1)){
 
-                    //i.setColor(COLOR_FILLED);
-                  //  hubConnection.send("ChangeTableState",i.getTableId() -1, 1);
-                }
-            }
         }
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        hubConnection.close();
-    }
+
     private void API_GetListTables(){
         ApiClient.getApiClient().create(ApiInterface.class).getListTable().enqueue(new Callback<List<Table>>() {
             @Override

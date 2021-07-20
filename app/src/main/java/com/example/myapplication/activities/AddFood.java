@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -59,7 +60,7 @@ public class AddFood extends AppCompatActivity {
         setContentView(R.layout.activity_add_food);
         AnhXa();
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
-        Log.e("hub: ",hubConnection.toString());
+
         // bat cam
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,6 +100,9 @@ public class AddFood extends AppCompatActivity {
                 uploadNewFood();
             }
         });
+
+
+
         btnDele.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -128,40 +132,46 @@ public class AddFood extends AppCompatActivity {
             String foodBase64Image = Base64.encodeToString(hinhanh,0);
 
             item = new UploadFoodItem(foodName, Integer.parseInt(foodPrice), dishType, foodBase64Image);
+            API_AddNewFood(item);
 
 
-            ApiClient.getApiClient().create(ApiInterface.class).addNewFood(item).enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    Log.e("Add food response", response+"");
-
-
-                    if(response.code() == 200) {
-                        Toast.makeText(AddFood.this, "Món đã được thêm", Toast.LENGTH_SHORT).show();
-                        if (hubConnection == null || hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED) {
-                            hubConnection.start().blockingAwait();
-
-                        }
-                        Log.e("status", hubConnection.getConnectionState()+"");
-                        hubConnection.send("SendNewFood", foodName, Integer.parseInt(foodPrice), dishType);
-                        finish();
-                    }
-                    else {
-                        Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.e("Add food failed", t+"");
-                    Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
-                    finish();
-
-                }
-            });
 
         }
+    }
+
+    private void API_AddNewFood(UploadFoodItem item) {
+        ApiClient.getApiClient().create(ApiInterface.class).addNewFood(item).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.e("Add food response", response+"");
+                if(response.code() == 200) {
+                    Toast.makeText(AddFood.this, "Món đã được thêm", Toast.LENGTH_SHORT).show();
+                    //if (hubConnection == null || hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED) {
+                    //    hubConnection.start().blockingAwait();
+                    //}
+                    //Log.e("status", hubConnection.getConnectionState()+"");
+                    try{
+                        hubConnection.send("SendNewFood", 1);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    finish();
+                }
+                else {
+                    Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("Add food failed", t+"");
+                Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+                finish();
+
+            }
+        });
+        new HubConnectionTask().execute(hubConnection);
     }
 
 
@@ -201,5 +211,21 @@ public class AddFood extends AppCompatActivity {
         type_drink = (RadioButton)findViewById(R.id.type_drink);
         radioGroup = (RadioGroup)findViewById(R.id.radioGroup);
 
+    }
+
+
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection = hubConnections[0];
+            hubConnection.start().blockingAwait();
+            return null;
+        }
     }
 }

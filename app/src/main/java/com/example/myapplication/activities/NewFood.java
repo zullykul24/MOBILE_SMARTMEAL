@@ -1,5 +1,6 @@
 package com.example.myapplication.activities;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -50,22 +51,32 @@ public class NewFood extends AppCompatActivity {
         ////
         ///
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
+        hubConnection.start();
+        menuFoodItemAdapter = new MenuFoodItemAdapter(NewFood.this, R.layout.item_menu_food, arrayNewFood);
+        listview.setAdapter(menuFoodItemAdapter);
+        API_NewFood();
 
-            hubConnection.start();
 
+        hubConnection.on("ReceiveNewFood", (msg) ->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    API_NewFood();
+                }
+            });
 
+            Log.e("ReceiveNewFoodmsg",msg.toString());
+        }, Integer.class);
+    }
 
-        /// add món vào list này nè
-        ///
-        //////chỗ này lấy ảnh test thôi
-
+    private void API_NewFood() {
         ApiClient.getApiClient().create(ApiInterface.class).getListDishes().enqueue(new Callback<List<MenuFoodItem>>() {
             @Override
             public void onResponse(Call<List<MenuFoodItem>> call, Response<List<MenuFoodItem>> response) {
                 responseList = (ArrayList<MenuFoodItem>) response.body();
                 for (MenuFoodItem i:responseList){
                     /// thêm tất cả các món từ response vào menuItemArrayList
-                    arrayNewFood.add(new MenuFoodItem( i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                    arrayNewFood.add(0,new MenuFoodItem( i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
                 }
                 Log.e("Get list dishes status:", "Success");
                 menuFoodItemAdapter.notifyDataSetChanged();
@@ -76,28 +87,7 @@ public class NewFood extends AppCompatActivity {
                 Log.e("Get list dishes status:", "Failed"+ t);
             }
         });
-
-
-        //
-
-
-       ///
-        //
-
-
-        menuFoodItemAdapter = new MenuFoodItemAdapter(NewFood.this, R.layout.item_menu_food, arrayNewFood);
-        listview.setAdapter(menuFoodItemAdapter);
-        hubConnection.on("ReceiveNewFood", (foodName, foodPrice, dishType) ->{
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    receivedItem = new MenuFoodItem(0,foodName,foodPrice, dishType, ApiClient.BASE_URL);
-                    arrayNewFood.add(0, receivedItem);
-                    menuFoodItemAdapter.notifyDataSetChanged();
-                }
-            });
-
-            Log.e("ReceiveNewFoodmsg",foodName + foodPrice+""+ dishType+"");
-        }, String.class, Integer.class, Integer.class);
     }
+
+
 }

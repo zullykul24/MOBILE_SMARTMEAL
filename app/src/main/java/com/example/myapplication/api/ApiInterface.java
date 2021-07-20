@@ -62,5 +62,8 @@ import retrofit2.http.Path;
 
         @GET("OrderDetail/GetDishesDone/{tableId}")
         Call<List<FoodOrderItem>> getListDone(@Path("tableId") int tableId);
+
+        @POST("Payment")
+        Call<ResponseBody> confirmPayment(@Body String tableId);
     }
 

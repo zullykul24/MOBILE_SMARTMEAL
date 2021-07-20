@@ -19,6 +19,8 @@ import com.example.myapplication.adapters.KitchenFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.FoodOrderItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,12 +37,15 @@ public class KitchenDrink extends AppCompatActivity {
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
+    HubConnection hubConnection;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kitchen_drink);
         kitchenOrderedDrinkListView = (ListView)findViewById(R.id.ordered_drinklistview);
         backToMain = (ImageButton)findViewById(R.id.img_back_btn_from_kitchen_ordered_drink);
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        hubConnection.start();
         foodOrderItemArrayList = new ArrayList<>();
 
 
@@ -51,6 +56,19 @@ public class KitchenDrink extends AppCompatActivity {
         API_GetListDrinkOrdered();
 
         kitchenOrderedDrinkListView.setAdapter(adapter);
+
+        // nhận signalr confirm ordered food
+        hubConnection.on("OrderedFoodReceived", (dishType) ->{
+            if(dishType == 0){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        API_GetListDrinkOrdered();
+                    }
+                });
+            }
+            Log.e("OrderedFoodReceivedmsg",dishType+"");
+        }, Integer.class);
 
 
         // click to back to main activity

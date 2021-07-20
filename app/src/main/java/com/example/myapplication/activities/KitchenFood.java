@@ -20,6 +20,9 @@ import com.example.myapplication.adapters.KitchenFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.FoodOrderItem;
+import com.example.myapplication.models.MenuFoodItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +39,15 @@ public class KitchenFood extends AppCompatActivity {
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
+    HubConnection hubConnection;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_kitchen_food);
         kitchenOrderedFoodListView = findViewById(R.id.ordered_food_listview);
         backToMain = findViewById(R.id.img_back_btn_from_kitchen_ordered);
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        hubConnection.start();
 
 
         // click to back to main activity
@@ -62,6 +68,19 @@ public class KitchenFood extends AppCompatActivity {
         adapter = new KitchenFoodItemAdapter(KitchenFood.this, R.layout.item_kitchen_ordered_food,foodOrderItemArrayList);
         kitchenOrderedFoodListView.setAdapter(adapter);
 
+        // nhận signalr confirm ordered food
+        hubConnection.on("OrderedFoodReceived", (dishType) ->{
+            if(dishType == 1){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        API_GetListOrdered();
+                    }
+                });
+            }
+            Log.e("OrderedFoodReceivedmsg",dishType+"");
+        }, Integer.class);
+
 
 
 
@@ -81,6 +100,8 @@ public class KitchenFood extends AppCompatActivity {
 
 
     }
+
+
     private void ShowDialog(final int position){
         builder = new AlertDialog.Builder(KitchenFood.this);
         builder.setMessage("Món đã sẵn sàng?");

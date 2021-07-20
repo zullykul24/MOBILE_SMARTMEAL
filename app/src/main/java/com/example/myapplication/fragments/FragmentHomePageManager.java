@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
+import com.example.myapplication.activities.ATest;
 import com.example.myapplication.activities.AddFood;
 import com.example.myapplication.activities.KitchenDrink;
 import com.example.myapplication.activities.KitchenFood;
@@ -135,9 +136,7 @@ public class FragmentHomePageManager extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intentToPayment = new Intent(getActivity().getApplicationContext(), Payment.class);
-                intentToPayment.putExtra("accountUsername", account.getUsername());
-                Log.d("check", account.getUsername()+" ");
-                startActivityForResult(intentToPayment, 65);
+                startActivity(intentToPayment);
             }
         });
         rootView.setOnTouchListener(new View.OnTouchListener() {
