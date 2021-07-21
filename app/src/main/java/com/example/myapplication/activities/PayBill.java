@@ -67,6 +67,8 @@ public class PayBill extends AppCompatActivity {
         tableIdText.setText(tableId+"");
         paymentId.setText(orderId + "");
 
+        int cashierId = DataLocalManager.getLoggedinAccount().getAccountId();
+
         cashierName.setText(DataLocalManager.getLoggedinAccount().getFullName());
 
 ////        // date payment
@@ -84,7 +86,9 @@ public class PayBill extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 /// SET TRẠNG THÁI ĐÃ THANH TOÁN
-                API_ConfirmPayment(tableId);
+                API_ConfirmPayment(tableId, cashierId);
+                API_ChangeOrderStatusToBePaid(orderId);
+                API_UpdateTableStatus(String.valueOf(tableId), "0");
                 finish();
 
             }
@@ -99,9 +103,44 @@ public class PayBill extends AppCompatActivity {
         });
 
     }
+    private void API_UpdateTableStatus(String tableID, String status){
+        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), status).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    Log.e("update table status to be empty: ", "ok");
+                } else {
+                    Log.e("update table status to be empty: ", "failed");
+                }
+            }
 
-    private void API_ConfirmPayment(int tableId0) {
-        ApiClient.getApiClient().create(ApiInterface.class).confirmPayment(String.valueOf(tableId0)).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("update table status to be empty failed ", t.toString());
+            }
+        });
+    }
+
+    private void API_ChangeOrderStatusToBePaid(int orderId) {
+        ApiClient.getApiClient().create(ApiInterface.class).changeOrderStatusToBePaid(orderId).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.code() == 200){
+                    Log.e("change order status", "ok");
+                } else {
+                    Log.e("change order status", "failed");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("change order status failed: ", t.toString());
+            }
+        });
+    }
+
+    private void API_ConfirmPayment(int tableId0, int cashierId) {
+        ApiClient.getApiClient().create(ApiInterface.class).confirmPayment(String.valueOf(tableId0), String.valueOf(cashierId)).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){

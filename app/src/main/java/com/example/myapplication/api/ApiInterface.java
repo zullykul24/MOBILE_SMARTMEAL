@@ -4,6 +4,7 @@ import com.example.myapplication.activities.Order;
 import com.example.myapplication.models.Account;
 import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
+import com.example.myapplication.models.HistoryItem;
 import com.example.myapplication.models.MenuFoodItem;
 import com.example.myapplication.models.Table;
 import com.example.myapplication.models.UploadFoodItem;
@@ -57,13 +58,19 @@ import retrofit2.http.Path;
         @PUT("OrderDetail/OrderDetailId/{orderDetailId}")
         Call<ResponseBody> putDishReady(@Path("orderDetailId") int orderDetailId, @Body String status);
 
-        @GET("Orders")
+        @GET("Orders/isReady")
         Call<List<CreateOrder>> getPaymentTables();
 
         @GET("OrderDetail/GetDishesDone/{tableId}")
         Call<List<FoodOrderItem>> getListDone(@Path("tableId") int tableId);
 
-        @POST("Payment")
-        Call<ResponseBody> confirmPayment(@Body String tableId);
+        @POST("Payment/{tableId}/{cashierId}")
+        Call<ResponseBody> confirmPayment(@Path("tableId") String tableId, @Path("cashierId") String cashierId);
+
+        @PUT("Orders/isPaid/{orderId}")
+        Call<ResponseBody> changeOrderStatusToBePaid(@Path("orderId") int orderId);
+
+        @GET("Payment")
+        Call<List<HistoryItem>> getHistory();
     }
 

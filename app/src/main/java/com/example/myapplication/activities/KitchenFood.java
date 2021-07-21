@@ -150,7 +150,7 @@ public class KitchenFood extends AppCompatActivity {
                     responseList = (ArrayList<FoodOrderItem>) response.body();
                     for(FoodOrderItem item:responseList){
                         if(item.getDishTypeId() == 1){
-                            foodOrderItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(),
+                            foodOrderItemArrayList.add(0,new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(),
                                     ApiClient.BASE_URL +"Image/"+item.getImage(), 1, item.getOrderDetailId()));
                         }
 

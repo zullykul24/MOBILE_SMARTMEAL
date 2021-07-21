@@ -8,7 +8,7 @@
     >
     <RelativeLayout
         android:background="@color/colorAccent"
-        android:id="@+id/payment_header"
+        android:id="@+id/history_header"
         android:layout_width="match_parent"
         android:layout_height="80dp">
         <TextView
@@ -17,7 +17,7 @@
             android:layout_height="match_parent"
             android:textColor="#fff"
             android:fontFamily="@font/sriracha"
-            android:text="Thanh toán"
+            android:text="Lịch sử"
             android:gravity="center"
             android:textSize="40sp"></TextView>
         <ImageButton
@@ -25,18 +25,19 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:scaleType="center"
-            android:id="@+id/payment_backtohome_btn"
+            android:id="@+id/history_backtohome_btn"
             android:layout_marginLeft="20dp"
+
             android:background="@color/colorAccent"
             android:src="@drawable/white_arr2"></ImageButton>
     </RelativeLayout>
     <ListView
-        android:id="@+id/list_payment_item"
+        android:id="@+id/list_history_item"
         android:layout_width="match_parent"
-
         android:divider="@null"
+
         android:layout_height="wrap_content"
-        tools:listitem="@layout/item_payment"
+        tools:listitem="@layout/item_history"
         android:layout_marginTop="40dp"
-        android:layout_below="@id/payment_header"></ListView>
+        android:layout_below="@id/history_header"></ListView>
 </RelativeLayout>

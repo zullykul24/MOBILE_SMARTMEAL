@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.ATest;
 import com.example.myapplication.activities.AddFood;
+import com.example.myapplication.activities.History;
 import com.example.myapplication.activities.KitchenDrink;
 import com.example.myapplication.activities.KitchenFood;
 import com.example.myapplication.activities.NewFood;
@@ -128,6 +129,14 @@ public class FragmentHomePageManager extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), KitchenDrink.class);
+                startActivity(intent);
+            }
+        });
+
+        historyBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), History.class);
                 startActivity(intent);
             }
         });

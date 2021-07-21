@@ -137,7 +137,7 @@ public class KitchenDrink extends AppCompatActivity {
                     responseList = (ArrayList<FoodOrderItem>) response.body();
                     for(FoodOrderItem item:responseList){
                         if(item.getDishTypeId() == 0){
-                            foodOrderItemArrayList.add(new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(), ApiClient.BASE_URL +"Image/"+item.getImage(), 0, item.getOrderDetailId()));
+                            foodOrderItemArrayList.add(0,new FoodOrderItem(item.getDishId(), item.getTableId(), item.getDishName(), item.getQuantityOrder(), ApiClient.BASE_URL +"Image/"+item.getImage(), 0, item.getOrderDetailId()));
                         }
 
                     }
