@@ -43,7 +43,7 @@ public class FragmentHomePageManager extends Fragment {
 
         newFoodBtn = rootView.findViewById(R.id.manage_new_food);
         paymentBtn = rootView.findViewById(R.id.manager_payment);
-        historyBtn = rootView.findViewById(R.id.manager_payment);
+        historyBtn = rootView.findViewById(R.id.history_btn);
 
 
         // for waiter
@@ -58,10 +58,12 @@ public class FragmentHomePageManager extends Fragment {
         Account account = DataLocalManager.getLoggedinAccount();
         ////
         /// glide để bo góc ảnh
-        Glide.with(this).load(R.drawable.new_food).circleCrop().into(newFoodBtn);
-        Glide.with(this).load(R.drawable.new_table2).circleCrop().into(kitchenDrinkBtn);
+        Glide.with(this).load(R.drawable.new_food11).circleCrop().into(newFoodBtn);
+        Glide.with(this).load(R.drawable.juice).circleCrop().into(kitchenDrinkBtn);
         Glide.with(this).load(R.drawable.history).circleCrop().into(historyBtn);
         Glide.with(this).load(R.drawable.food_menu).circleCrop().into(menuFoodBtn);
+        Glide.with(this).load(R.drawable.payment).circleCrop().into(paymentBtn);
+        Glide.with(this).load(R.drawable.ordered_food).into(kitchenFoodBtn);
 
 
         // for waiter

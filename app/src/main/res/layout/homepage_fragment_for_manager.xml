@@ -71,7 +71,7 @@
                     android:layout_width="70dp"
                     android:layout_height="70dp"
                     android:layout_centerHorizontal="true"
-                    android:src="@drawable/add_food"
+                    android:src="@drawable/ordered_food"
                     android:scaleType="fitCenter"
                     android:background="@drawable/home_item"
                     ></ImageButton>
@@ -95,7 +95,7 @@
                     android:layout_width="70dp"
                     android:layout_height="70dp"
                     android:layout_centerHorizontal="true"
-                    android:src="@drawable/new_table2"
+                    android:src="@drawable/juice"
                     android:scaleType="fitCenter"
                     android:background="@drawable/home_item"
                     ></ImageButton>
@@ -128,17 +128,10 @@
                     android:layout_width="70dp"
                     android:layout_height="70dp"
                     android:layout_centerHorizontal="true"
-
                     android:background="@drawable/home_item"
-                    android:src="@drawable/new_food"
-
+                    android:src="@drawable/new_food11"
                     android:scaleType="fitCenter"
                     android:textSize="13sp"
-
-
-
-
-
                     ></ImageButton>
                 <TextView
                     android:layout_width="wrap_content"

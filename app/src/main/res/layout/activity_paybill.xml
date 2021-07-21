@@ -5,7 +5,10 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     >
-
+<RelativeLayout
+    android:id="@+id/pay_bill_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
     <TextView
         android:id="@+id/text_paybill_table"
         android:layout_width="match_parent"
@@ -18,10 +21,24 @@
         android:textColor="#fff"
         android:fontFamily="@font/sriracha"
         android:textSize="40sp"></TextView>
+    <ImageButton
+        android:layout_width="35dp"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:scaleType="center"
+        android:id="@+id/paybill_backtohome_btn"
+        android:layout_marginLeft="20dp"
+
+        android:background="@color/colorAccent"
+        android:src="@drawable/white_arr2"></ImageButton>
+</RelativeLayout>
+
+
+
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_below="@id/text_paybill_table"
+        android:layout_below="@id/pay_bill_header"
         android:id="@+id/pay_bill_content"
         android:padding="15dp"
         android:layout_height="wrap_content">

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,6 +39,7 @@ public class PayBill extends AppCompatActivity {
     TextView totalPriceText;
     TextView tablename;
     Button btn_pay;
+    ImageButton backToHome;
     int orderId;
     int totalPrice = 0;
     ListView listViewPayBill;
@@ -55,6 +57,7 @@ public class PayBill extends AppCompatActivity {
         tableIdText = (TextView)findViewById(R.id.tableId);
         cashierName = (TextView) findViewById(R.id.cashier_name);
         paymentId = (TextView) findViewById(R.id.paymentId);
+        backToHome = (ImageButton)findViewById(R.id.paybill_backtohome_btn);
         date_paymented = (TextView) findViewById(R.id.date_paymented);
         tablename = (TextView)  findViewById(R.id.text_paybill_table);
         btn_pay = (Button) findViewById(R.id.btn_thanh_toan);
@@ -87,6 +90,13 @@ public class PayBill extends AppCompatActivity {
             }
         });
         Log.d("checkdate", ""+ date);
+
+        backToHome.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
     }
 
