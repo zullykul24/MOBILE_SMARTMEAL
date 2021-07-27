@@ -1,5 +1,6 @@
 package com.example.myapplication.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,6 +21,7 @@ import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.ea.async.Async;
+import com.example.myapplication.Config;
 import com.example.myapplication.R;
 
 import com.example.myapplication.adapters.FoodOrderItemAdapter;
@@ -55,14 +57,14 @@ public class Order extends AppCompatActivity {
     ImageButton backToFragmentTableOrder;
     ArrayList<FoodOrderItem> arrayListChosenFood, arrayListPost, arrayFood;
     ArrayList<FoodOrderItem>  responseList;
-    String orderStatus = "";
-
     FoodOrderItemAdapter adapter;
 
     long millis=System.currentTimeMillis();
     java.sql.Date date=new java.sql.Date(millis);
     int table_Id;
     int table_Status;
+    int res;
+    int result = 0;
     HubConnection hubConnection;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -75,6 +77,7 @@ public class Order extends AppCompatActivity {
         table_Status = getIntent().getIntExtra("Table_status", 0);
         // là cái thanh cuộn các món ở dưới.
         listViewFood = (SwipeMenuListView) findViewById(R.id.listViewChosenFood);
+
 
         View footer = getLayoutInflater().inflate(R.layout.footer, null);
 
@@ -104,36 +107,23 @@ public class Order extends AppCompatActivity {
         btn_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 if(!arrayListChosenFood.isEmpty()){
-                    if(table_Status == 0 || table_Status == -1 ){
-
-                        /// set status to 1 (is being served)
-                        API_UpdateTableStatus(String.valueOf(table_Id), "1");
-
-
-                        //// create new order
-                        CreateOrder order = new CreateOrder(0,table_Id,0);
-                        API_CreateOrder(order);
-                    }
-                    //just post necessary info
                     for(FoodOrderItem item:arrayFood) {
                         if(item.getIsBooked() == 0)
                         {
                             arrayListPost.add(new FoodOrderItem(table_Id, item.getDishId(),
                                     DataLocalManager.getLoggedinAccount().getAccountId(), item.getQuantityOrder()));
                         }
-
                     }
-                    ///post new orderdetails
-                   API_PostNewOrderDetail(arrayListPost, table_Id);
+                    if(table_Status == 0 || table_Status == -1 ){
+                          API_PostTableFirstTime(arrayListPost, table_Id);
+                    } else {
+                        ///post new orderdetails
+                          API_PostNewOrderDetail(arrayListPost, table_Id);
+                    }
+                } else {
+                    finish();
                 }
-                // intent back to fragment table order
-                Intent intent = new Intent(Order.this, FragmentTableOrder.class);
-                intent.putExtra("banId", table_Id);
-                intent.putExtra("orderStatus", orderStatus);
-                setResult(291,intent );
-                finish();
             }
         });
         btn_cancel.setOnClickListener(new View.OnClickListener() {
@@ -156,11 +146,63 @@ public class Order extends AppCompatActivity {
         backToFragmentTableOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intentToFragmentTableOrder = new Intent(Order.this, MainActivity.class);
-                setResult(114, intentToFragmentTableOrder);
+
                 finish();
             }
         });
+
+    }
+
+    private void API_PostTableFirstTime(ArrayList<FoodOrderItem> arrayListPost, int table_id) {
+        Intent intent = new Intent(Order.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("banId", table_id);
+
+        ApiClient.getApiClient().create(ApiInterface.class).postOrderTableFirstTime(arrayListPost, table_id).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                    if(response.code() == 200){
+                        result = 1;
+                        Log.e("postorder1time: ", "ok");
+
+                        Log.e("res", result+"");
+
+                        intent.putExtra("orderStatus", result);
+                        setResult(Config.ORDER_STATUS_CODE,intent );
+                        finish();
+                    }
+                    else {
+                        Log.e("postorder1time: ", "err with code: "+response.code());
+                        intent.putExtra("orderStatus", result);
+                        setResult(Config.ORDER_STATUS_CODE,intent );
+                        finish();
+
+                    }
+
+
+                if(result == 1){
+                    try {
+                        hubConnection.send("ConfirmOrderedFood", table_id);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("postorder1time failed: ", t+"");
+                intent.putExtra("orderStatus", result);
+                setResult(Config.ORDER_STATUS_CODE,intent );
+                finish();
+
+
+            }
+        });
+        new HubConnectionTask().execute(hubConnection);
+
 
     }
 
@@ -246,77 +288,51 @@ public class Order extends AppCompatActivity {
             }
         });
     }
-    private void API_UpdateTableStatus(String tableID, String status){
-        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), status).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.code() == 200){
-                    Toast.makeText(Order.this, "Đặt món thành công", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(Order.this, "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(Order.this, "Đã có lỗi xảy ra.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-    private void API_CreateOrder(CreateOrder order){
-        ApiClient.getApiClient().create(ApiInterface.class).createOrder(order).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    if ((response.code() == 200) && response.body().string().equals("1")){
-                        Log.e("Create order status :", "Ok");
-                    }
-                    else {
-                        Log.e("Create order status :", "Not Ok with code" + response.code());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("Create order status :", "Not Ok with throw" + t.toString());
-            }
-        });
-    }
     private void API_PostNewOrderDetail(ArrayList<FoodOrderItem> postArray, int table){
+        Intent intent = new Intent(Order.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra("banId", table);
+
+
         ApiClient.getApiClient().create(ApiInterface.class).postOrder(postArray).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
                     if(response.code() == 200 && response.body().string().equals("1")){
+                        result = 1;
                         Log.e("post order status: ", "ok");
-                        orderStatus = "Đặt món thành công";
-                        try {
-                            hubConnection.send("ConfirmOrderedFood", table);
-
-                        } catch (Exception e){
-                            e.printStackTrace();
-                        }
+                        intent.putExtra("orderStatus", result);
+                        setResult(Config.ORDER_STATUS_CODE,intent );
+                        finish();
 
                     }
                     else {
                         Log.e("post order status: ", "err with code: "+response.code());
+                        intent.putExtra("orderStatus", result);
+                        setResult(Config.ORDER_STATUS_CODE,intent );
+                        finish();
+
 
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("post order failed: ", t+"");
-                orderStatus= "Có lỗi xảy ra. Vui lòng thử lại sau.";
+                intent.putExtra("orderStatus", result);
+                setResult(Config.ORDER_STATUS_CODE,intent );
+                finish();
+
+
             }
         });
-        new HubConnectionTask().execute(hubConnection);
+
 
     }
     class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {

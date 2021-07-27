@@ -2,6 +2,8 @@ package com.example.myapplication.api;
 
 import com.example.myapplication.activities.Order;
 import com.example.myapplication.models.Account;
+import com.example.myapplication.models.CountByDishNameItem;
+import com.example.myapplication.models.CountByUserItem;
 import com.example.myapplication.models.CreateOrder;
 import com.example.myapplication.models.FoodOrderItem;
 import com.example.myapplication.models.HistoryItem;
@@ -46,8 +48,13 @@ import retrofit2.http.Path;
         @POST("OrderDetail/Table")
         Call<ResponseBody> postOrder(@Body List<FoodOrderItem> list);
 
-        @POST("Orders")
-        Call<ResponseBody> createOrder(@Body CreateOrder order);
+        @POST("OrderDetail/TableFirstTime/{tableId}")
+        Call<ResponseBody> postOrderTableFirstTime(@Body List<FoodOrderItem> list, @Path("tableId") int tableId);
+
+        @POST("Orders/firstTime/{tableId}")
+        Call<ResponseBody> createOrder(@Path("tableId") int tableId);
+
+
 
         @GET("OrderDetail/isOrdered")
         Call<List<FoodOrderItem>> getListOrdered();
@@ -61,16 +68,26 @@ import retrofit2.http.Path;
         @GET("Orders/isReady")
         Call<List<CreateOrder>> getPaymentTables();
 
-        @GET("OrderDetail/GetDishesDone/{tableId}")
-        Call<List<FoodOrderItem>> getListDone(@Path("tableId") int tableId);
+        @GET("OrderDetail/GetDishesDone/{orderId}")
+        Call<List<FoodOrderItem>> getListDone(@Path("orderId") int orderId);
 
-        @POST("Payment/{tableId}/{cashierId}")
-        Call<ResponseBody> confirmPayment(@Path("tableId") String tableId, @Path("cashierId") String cashierId);
 
-        @PUT("Orders/isPaid/{orderId}")
-        Call<ResponseBody> changeOrderStatusToBePaid(@Path("orderId") int orderId);
+
+        @POST("Orders/isPaid/{orderId}/{tableId}/{cashierId}")
+        Call<ResponseBody> confirmPayment(@Path("orderId") int orderId,
+                                                     @Path("tableId") int tableId,
+                                                     @Path("cashierId") int cashierId);
 
         @GET("Payment")
         Call<List<HistoryItem>> getHistory();
+
+        @GET("Payment/getByDate/{fromDate}/{toDate}")
+        Call<List<HistoryItem>> getHistoryByDate(@Path("fromDate") String fromDate, @Path("toDate") String toDate);
+
+        @GET("Dish/AllDishesPaid")
+        Call<List<CountByDishNameItem>> getCountByDishName();
+
+        @GET("Dish/AllDishesCountByAccount")
+        Call<List<CountByUserItem>> getCountByUser();
     }
 

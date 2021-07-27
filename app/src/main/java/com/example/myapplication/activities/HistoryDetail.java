@@ -82,7 +82,7 @@ public class HistoryDetail extends AppCompatActivity {
         DecimalFormat df= new DecimalFormat("###,###,###");
         String priceString = df.format(total_price);
         totalPriceText.setText(priceString);
-        API_GetOrderDetailsPayment(tableId);
+        API_GetOrderDetailsPayment(orderId);
 
 
 

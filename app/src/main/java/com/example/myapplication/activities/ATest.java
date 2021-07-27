@@ -1,5 +1,6 @@
 package com.example.myapplication.activities;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -7,6 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,6 +34,17 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class ATest extends AppCompatActivity {
+    ActivityResultLauncher<Intent> launcher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if(result.getResultCode() == 1){
+                        Intent data = result.getData();
+                        Log.e("data", data.toString()+ data.getIntExtra("number", 0));
+                    }
+                }
+            });
+
     ArrayList<MenuFoodItem> responseList, menu;
 
     HubConnection hubConnection;
@@ -99,4 +116,5 @@ public class ATest extends AppCompatActivity {
             return null;
         }
     }
+
 }

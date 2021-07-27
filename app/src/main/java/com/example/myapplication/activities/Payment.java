@@ -1,6 +1,7 @@
 package com.example.myapplication.activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,12 +13,14 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.Config;
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.PaymentTableItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.CreateOrder;
-import com.example.myapplication.models.PaymentTableItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,7 @@ public class Payment extends AppCompatActivity {
     ImageButton backToHomeBtn;
     ArrayList<CreateOrder> paymentTableArrayList, responseList;
     PaymentTableItemAdapter paymentTableAdapter;
+    HubConnection hubConnection;
 
 
 
@@ -40,7 +44,7 @@ public class Payment extends AppCompatActivity {
         setContentView(R.layout.activity_payment);
         paymentTableArrayList = new ArrayList<>();
         listViewPaymentTable = findViewById(R.id.list_payment_item);
-
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"confirmPaymentHub").build();
         backToHomeBtn = (ImageButton)findViewById(R.id.payment_backtohome_btn);
         backToHomeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +52,18 @@ public class Payment extends AppCompatActivity {
                 finish();
             }
         });
+        new Payment.HubConnectionTask().execute(hubConnection);
+
+        hubConnection.on("ConfirmPayment", (msg)->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    paymentTableArrayList.clear();
+                    responseList.clear();
+                    API_GetPaymentTables();
+                }
+            });
+        }, Integer.class);
 
         API_GetPaymentTables();
         paymentTableAdapter = new PaymentTableItemAdapter(this, R.layout.item_payment, paymentTableArrayList);
@@ -58,9 +74,40 @@ public class Payment extends AppCompatActivity {
                 Intent intentToPayBill = new Intent(Payment.this, PayBill.class);
                 intentToPayBill.putExtra("orderId", paymentTableArrayList.get(position).getOrderId());
                 intentToPayBill.putExtra("tableId", paymentTableArrayList.get(position).getTableId());
-                startActivity(intentToPayBill);
+                startActivityForResult(intentToPayBill, Config.PAYMENT_TO_PAYBILL);
+               // startActivity(intentToPayBill);
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == Config.PAYMENT_TO_PAYBILL){
+            if (resultCode == Config.CONFIRM_PAYMENT_OK){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Payment.this, "Xác nhận thanh toán thành công", Toast.LENGTH_SHORT).show();
+                        try{
+                            new Payment.HubConnectionTask().execute(hubConnection);
+                            hubConnection.send("ConfirmPayment", 0);
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+            } else if(resultCode == Config.CONFIRM_PAYMENT_FAILED){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(Payment.this, "Xác nhận thanh toán thất bại.\nVui lòng thử lại sau.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        }
     }
 
     private void API_GetPaymentTables() {
@@ -85,6 +132,20 @@ public class Payment extends AppCompatActivity {
                 Log.e("get payment tables failed: ", t.toString());
             }
         });
+    }
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
     }
 
 

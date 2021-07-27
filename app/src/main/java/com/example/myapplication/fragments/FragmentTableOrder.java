@@ -2,6 +2,7 @@ package com.example.myapplication.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -13,11 +14,16 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.myapplication.Config;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.Order;
 import com.example.myapplication.adapters.TableItemAdapter;
@@ -89,6 +95,8 @@ public class FragmentTableOrder extends Fragment {
         hubConnection.start();
 
 
+
+
         Account account = DataLocalManager.getLoggedinAccount();
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
         tableArrayList = new ArrayList<>();
@@ -125,22 +133,17 @@ public class FragmentTableOrder extends Fragment {
                 intentToOrder.putExtra("Table_id", tableArrayList.get(position).getTableId());
                 intentToOrder.putExtra("Table_status", tableArrayList.get(position).getStatus());
                 intentToOrder.putExtra("accountUsername",  account.getUsername());
-                startActivityForResult(intentToOrder, 114);
+                launcher.launch(intentToOrder);
                 // }
             }
         });
         registerForContextMenu(gridViewTable);
         return rootView;
     }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==114&& resultCode == 291){
-            //WHY THIS TOAST IS NOT SHOWN?
-            Toast.makeText(getContext().getApplicationContext(), data.getStringExtra("orderStatus"), Toast.LENGTH_SHORT).show();
 
-        }
-    }
+
+
+
 
 
     private void API_GetListTables(){
@@ -212,4 +215,16 @@ public class FragmentTableOrder extends Fragment {
             }
         });
     }
+    ActivityResultLauncher<Intent> launcher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if(result.getResultCode() == Config.ORDER_STATUS_CODE){
+                        Intent data = result.getData();
+                        int status = data.getIntExtra("orderStatus", 0);
+                        Log.e("intent data: ",  status +"");
+                        Toast.makeText(getContext(), Config.ORDER_STATUS[status], Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 }

@@ -15,7 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
+        <activity android:name=".activities.CountByUserName"></activity>
+        <activity android:name=".activities.CountByDishName" />
+        <activity android:name=".activities.DishCounting" />
         <activity android:name=".activities.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,7 +37,7 @@
         <activity android:name=".activities.ChooseFood" />
         <activity android:name=".activities.ATest" />
         <activity android:name=".activities.History" />
-        <activity android:name=".activities.HistoryDetail"/>
+        <activity android:name=".activities.HistoryDetail" />
     </application>
 
 </manifest>

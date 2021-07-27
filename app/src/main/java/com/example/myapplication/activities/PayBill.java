@@ -1,6 +1,7 @@
 package com.example.myapplication.activities;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.myapplication.Config;
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.PayBillItemAdapter;
 import com.example.myapplication.api.ApiClient;
@@ -86,10 +88,10 @@ public class PayBill extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 /// SET TRẠNG THÁI ĐÃ THANH TOÁN
-                API_ConfirmPayment(tableId, cashierId);
-                API_ChangeOrderStatusToBePaid(orderId);
-                API_UpdateTableStatus(String.valueOf(tableId), "0");
-                finish();
+               // API_ConfirmPayment(tableId, cashierId);
+                API_ConfirmPayment(orderId, tableId, cashierId);
+
+               // finish();
 
             }
         });
@@ -103,77 +105,33 @@ public class PayBill extends AppCompatActivity {
         });
 
     }
-    private void API_UpdateTableStatus(String tableID, String status){
-        ApiClient.getApiClient().create(ApiInterface.class).updateTableStatus(String.valueOf(tableID), status).enqueue(new Callback<ResponseBody>() {
+
+
+    private void API_ConfirmPayment(int orderId, int tableId, int cashierId) {
+        Intent intent = new Intent(PayBill.this, Payment.class);
+        ApiClient.getApiClient().create(ApiInterface.class).confirmPayment(orderId, tableId, cashierId).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
-                    Log.e("update table status to be empty: ", "ok");
+                    Log.e("confirm payment: ", "ok");
+                    setResult(Config.CONFIRM_PAYMENT_OK, intent);
+                    finish();
                 } else {
-                    Log.e("update table status to be empty: ", "failed");
+                    Log.e("confirm payment: ", "failed");
+                    setResult(Config.CONFIRM_PAYMENT_FAILED, intent);
+                    finish();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("update table status to be empty failed ", t.toString());
+                Log.e("confirm payment failed: ", t.toString());
+                setResult(Config.CONFIRM_PAYMENT_FAILED);
             }
         });
     }
 
-    private void API_ChangeOrderStatusToBePaid(int orderId) {
-        ApiClient.getApiClient().create(ApiInterface.class).changeOrderStatusToBePaid(orderId).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.code() == 200){
-                    Log.e("change order status", "ok");
-                } else {
-                    Log.e("change order status", "failed");
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("change order status failed: ", t.toString());
-            }
-        });
-    }
-
-    private void API_ConfirmPayment(int tableId0, int cashierId) {
-        ApiClient.getApiClient().create(ApiInterface.class).confirmPayment(String.valueOf(tableId0), String.valueOf(cashierId)).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.code() == 200){
-                    Log.e("confirmed", "OK");
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayBill.this, "Xác nhận thanh toán bàn "+String.valueOf(tableId0)+"thành công", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-                else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(PayBill.this, "Xác nhận thanh toán thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("confirm payment err: ", t.toString());
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(PayBill.this, "Có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        });
-    }
 
     private void API_GetOrderDetailsPayment(int tableDoneId) {
         ApiClient.getApiClient().create(ApiInterface.class).getListDone(tableDoneId).enqueue(new Callback<List<FoodOrderItem>>() {

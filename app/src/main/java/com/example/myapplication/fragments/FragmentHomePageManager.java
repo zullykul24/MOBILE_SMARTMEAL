@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.example.myapplication.R;
 import com.example.myapplication.activities.ATest;
 import com.example.myapplication.activities.AddFood;
+import com.example.myapplication.activities.DishCounting;
 import com.example.myapplication.activities.History;
 import com.example.myapplication.activities.KitchenDrink;
 import com.example.myapplication.activities.KitchenFood;
@@ -33,6 +34,7 @@ public class FragmentHomePageManager extends Fragment {
     ImageButton addFoodBtn, kitchenDrinkBtn, newFoodBtn, paymentBtn, historyBtn, menuFoodBtn;
     ImageButton kitchenFoodBtn;
     ImageButton readyFoodBtn;
+    ImageButton dishCountingBtn;
     BottomNavigationView navbar;
     @Nullable
     @Override
@@ -40,6 +42,7 @@ public class FragmentHomePageManager extends Fragment {
         final View rootView =  inflater.inflate(R.layout.homepage_fragment_for_manager, container, false);
         ///// ánh xạ
         addFoodBtn = rootView.findViewById(R.id.manager_add_food_btn);
+        dishCountingBtn = rootView.findViewById(R.id.dish_counting_btn);
 
 
         newFoodBtn = rootView.findViewById(R.id.manage_new_food);
@@ -65,6 +68,7 @@ public class FragmentHomePageManager extends Fragment {
         Glide.with(this).load(R.drawable.food_menu).circleCrop().into(menuFoodBtn);
         Glide.with(this).load(R.drawable.payment).circleCrop().into(paymentBtn);
         Glide.with(this).load(R.drawable.ordered_food).into(kitchenFoodBtn);
+        Glide.with(this).load(R.drawable.statistics).into(dishCountingBtn);
 
 
         // for waiter
@@ -88,6 +92,15 @@ public class FragmentHomePageManager extends Fragment {
             public void onClick(View v) {
                 Intent intentFood = new Intent(getActivity(), WaiterFoodReady.class);
                 startActivity(intentFood);
+            }
+        });
+
+        //thống kê
+        dishCountingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), DishCounting.class);
+                startActivity(intent);
             }
         });
 

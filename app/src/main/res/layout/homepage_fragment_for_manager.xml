@@ -256,6 +256,32 @@
                     android:textSize="13sp"
                     android:layout_height="wrap_content"></TextView>
             </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/dish_counting_btn"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+
+                    android:scaleType="fitCenter"
+                    android:layout_centerHorizontal="true"
+
+                    android:src="@drawable/statistics"
+                    android:background="@drawable/home_item"
+                    ></ImageButton>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:text="Thống kê"
+                    android:layout_below="@id/dish_counting_btn"
+                    android:layout_alignLeft="@id/dish_counting_btn"
+                    android:layout_alignRight="@id/dish_counting_btn"
+                    android:gravity="center"
+                    android:textSize="13sp"
+                    android:layout_height="wrap_content"></TextView>
+            </RelativeLayout>
 
         </LinearLayout>
     </LinearLayout>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    >
+    <RelativeLayout
+        android:background="@color/colorAccent"
+        android:id="@+id/dish_counting_header"
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+        <TextView
+            android:id="@+id/text_thong_ke"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="#fff"
+            android:fontFamily="@font/sriracha"
+            android:text="Thống kê"
+            android:gravity="center"
+            android:textSize="40sp"></TextView>
+        <ImageButton
+            android:layout_width="35dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            android:id="@+id/dish_counting_backtohome_btn"
+            android:layout_marginLeft="20dp"
+
+            android:background="@color/colorAccent"
+            android:src="@drawable/white_arr2"></ImageButton>
+    </RelativeLayout>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_below="@id/dish_counting_header"
+        android:layout_marginTop="30dp"
+        android:textSize="25sp"
+        android:textColor="#fff"
+        android:paddingHorizontal="10dp"
+        android:background="@drawable/date_picker"
+        android:id="@+id/count_by_dishname"
+        android:textAllCaps="false"
+        android:textAlignment="textStart"
+        android:text="Thống kê số lượng đã bán theo tên món"
+        android:layout_marginHorizontal="30dp"></Button>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:paddingHorizontal="10dp"
+        android:layout_below="@id/count_by_dishname"
+        android:layout_marginTop="30dp"
+        android:textSize="25sp"
+        android:textColor="#fff"
+        android:background="@drawable/date_picker"
+        android:id="@+id/count_by_username"
+        android:textAllCaps="false"
+        android:textAlignment="textStart"
+        android:text="Thống kê số lượng đã bán theo nhân viên"
+        android:layout_marginHorizontal="30dp"></Button>
+
+
+</RelativeLayout>
