@@ -80,7 +80,7 @@ public class PayBill extends AppCompatActivity {
         payBillItemAdapter = new PayBillItemAdapter(PayBill.this, R.layout.item_paybill, payBillItemArrayList);
         listViewPayBill.setAdapter(payBillItemAdapter);
 
-        API_GetOrderDetailsPayment(tableId);
+        API_GetOrderDetailsPayment(orderId);
 
 
 
@@ -125,7 +125,7 @@ public class PayBill extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("confirm payment failed: ", t.toString());
+                Log.e("confirm failed: ", t.toString());
                 setResult(Config.CONFIRM_PAYMENT_FAILED);
             }
         });
@@ -133,8 +133,8 @@ public class PayBill extends AppCompatActivity {
 
 
 
-    private void API_GetOrderDetailsPayment(int tableDoneId) {
-        ApiClient.getApiClient().create(ApiInterface.class).getListDone(tableDoneId).enqueue(new Callback<List<FoodOrderItem>>() {
+    private void API_GetOrderDetailsPayment(int orderId) {
+        ApiClient.getApiClient().create(ApiInterface.class).getListDone(orderId).enqueue(new Callback<List<FoodOrderItem>>() {
             @Override
             public void onResponse(Call<List<FoodOrderItem>> call, Response<List<FoodOrderItem>> response) {
                 if(response.code() == 200){
@@ -165,7 +165,7 @@ public class PayBill extends AppCompatActivity {
             public void onFailure(Call<List<FoodOrderItem>> call, Throwable t) {
                 Toast.makeText(PayBill.this, "Không tải được hoá đơn. Vui lòng thử lại sau.",
                         Toast.LENGTH_LONG).show();
-                Log.e("get orderdetails payment failed: ", t.toString());
+                Log.e("get payment failed: ", t.toString());
             }
         });
     }

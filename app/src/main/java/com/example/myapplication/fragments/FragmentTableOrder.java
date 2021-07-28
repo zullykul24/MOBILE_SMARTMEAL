@@ -93,20 +93,12 @@ public class FragmentTableOrder extends Fragment {
         COLOR_EMPTY = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorEmptyTable));
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
         hubConnection.start();
-
-
-
-
         Account account = DataLocalManager.getLoggedinAccount();
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
         tableArrayList = new ArrayList<>();
         tableItemAdapter = new TableItemAdapter(getContext(), R.layout.table_item, tableArrayList);
-
         API_GetListTables();
-
         tableItemAdapter.notifyDataSetChanged();
-
-
         /////
         hubConnection.on("ConfirmOrderedFood", (tableId) ->{
             getActivity().runOnUiThread(new Runnable() {

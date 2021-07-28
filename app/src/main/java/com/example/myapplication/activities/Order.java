@@ -299,8 +299,8 @@ public class Order extends AppCompatActivity {
         ApiClient.getApiClient().create(ApiInterface.class).postOrder(postArray).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    if(response.code() == 200 && response.body().string().equals("1")){
+
+                    if(response.code() == 200){
                         result = 1;
                         Log.e("post order status: ", "ok");
                         intent.putExtra("orderStatus", result);
@@ -316,9 +316,14 @@ public class Order extends AppCompatActivity {
 
 
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                    if(result == 1){
+                        try {
+                            hubConnection.send("ConfirmOrderedFood", table);
+                        }catch (Exception e){
+                         e.printStackTrace();
+                        }
+                    }
+
 
             }
 

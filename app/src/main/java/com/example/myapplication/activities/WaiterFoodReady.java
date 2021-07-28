@@ -1,6 +1,7 @@
 package com.example.myapplication.activities;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.util.Log;
@@ -20,6 +21,8 @@ import com.example.myapplication.adapters.KitchenFoodItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.FoodOrderItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +39,16 @@ public class WaiterFoodReady extends AppCompatActivity {
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
+    HubConnection hubConnection;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiter_food_ready);
         kitchenOrderedFoodListView = findViewById(R.id.ready_food_listview);
         backToMain = findViewById(R.id.img_back_btn_from_ready_food);
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL + "foodDoneHub").build();
+        hubConnection.start();
 
 
         // click to back to main activity
@@ -62,13 +69,17 @@ public class WaiterFoodReady extends AppCompatActivity {
         adapter = new KitchenFoodItemAdapter(WaiterFoodReady.this, R.layout.item_kitchen_ordered_food,foodReadyItemArrayList);
         kitchenOrderedFoodListView.setAdapter(adapter);
 
-
-
-
-        ///
-
-
-
+        hubConnection.on("FoodDone", (msg)->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    foodReadyItemArrayList.clear();
+                    responseList.clear();
+                    API_GetListReady();
+                }
+            });
+        }, Integer.class);
+        //
         kitchenOrderedFoodListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -76,10 +87,6 @@ public class WaiterFoodReady extends AppCompatActivity {
 
             }
         });
-
-
-
-
     }
     private void ShowDialog(final int position){
         builder = new AlertDialog.Builder(WaiterFoodReady.this);
@@ -106,6 +113,11 @@ public class WaiterFoodReady extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
+                    try{
+                        hubConnection.send("FoodDone", 0);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                     /////
                 } else {
                     Toast.makeText(WaiterFoodReady.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
@@ -118,6 +130,7 @@ public class WaiterFoodReady extends AppCompatActivity {
                 Log.e("PutDishReady failed: ", t.toString());
             }
         });
+        new HubConnectionTask().execute(hubConnection);
     }
 
 
@@ -145,5 +158,19 @@ public class WaiterFoodReady extends AppCompatActivity {
                 Log.e("failure: ", t.toString());
             }
         });
+    }
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
     }
 }

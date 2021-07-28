@@ -15,6 +15,8 @@ import com.example.myapplication.adapters.CountByDishNameItemAdapter;
 import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.CountByDishNameItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,7 @@ public class CountByDishName extends AppCompatActivity {
     Button okBtn;
     ArrayList<CountByDishNameItem> arrayList, responseList;
     CountByDishNameItemAdapter adapter;
+    HubConnection hubConnection;
 
 
     @Override
@@ -38,12 +41,25 @@ public class CountByDishName extends AppCompatActivity {
         backBtn = findViewById(R.id.count_by_dishname_backtohome_btn);
         listView = findViewById(R.id.listview_count_by_dishname);
         okBtn = findViewById(R.id.cbd_btn_ok);
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"confirmPaymentHub").build();
+        hubConnection.start();
         arrayList = new ArrayList<>();
         adapter = new CountByDishNameItemAdapter(this, R.layout.item_count_by_dishname, arrayList);
         listView.setAdapter(adapter);
 
         //add data
         API_GetCountByDishName();
+
+        hubConnection.on("ConfirmPayment", (msg)->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    arrayList.clear();
+                    responseList.clear();
+                    API_GetCountByDishName();
+                }
+            });
+        }, Integer.class);
 
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,7 +81,7 @@ public class CountByDishName extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<CountByDishNameItem>> call, Response<List<CountByDishNameItem>> response) {
                 if(response.code() == 200){
-                    Log.e("get count by dish name: ", "ok");
+                    Log.e("get count: ", "ok");
                     responseList = (ArrayList<CountByDishNameItem>) response.body();
                     for(int i=0; i<responseList.size();i++){
                         arrayList.add(new CountByDishNameItem(
@@ -76,7 +92,7 @@ public class CountByDishName extends AppCompatActivity {
                     }
                     adapter.notifyDataSetChanged();
                 } else {
-                    Log.e("get count by dish name: ", "err");
+                    Log.e("get count: ", "err");
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -89,7 +105,7 @@ public class CountByDishName extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<CountByDishNameItem>> call, Throwable t) {
-                Log.e("get count by dish name failed: ", t.toString());
+                Log.e("get count failed: ", t.toString());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

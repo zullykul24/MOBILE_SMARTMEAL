@@ -1,6 +1,7 @@
 package com.example.myapplication.activities;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +38,7 @@ public class KitchenDrink extends AppCompatActivity {
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
-    HubConnection hubConnection;
+    HubConnection hubConnection, hubDrinkReady;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +46,9 @@ public class KitchenDrink extends AppCompatActivity {
         kitchenOrderedDrinkListView = (ListView)findViewById(R.id.ordered_drinklistview);
         backToMain = (ImageButton)findViewById(R.id.img_back_btn_from_kitchen_ordered_drink);
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        hubDrinkReady = HubConnectionBuilder.create(ApiClient.BASE_URL + "drinkReadyHub").build();
         hubConnection.start();
+        hubDrinkReady.start();
         foodOrderItemArrayList = new ArrayList<>();
 
 
@@ -59,15 +62,30 @@ public class KitchenDrink extends AppCompatActivity {
 
         // nhận signalr confirm ordered food
         hubConnection.on("OrderedFoodReceived", (dishType) ->{
-            if(dishType == 0){
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        foodOrderItemArrayList.clear();
+                        responseList.clear();
                         API_GetListDrinkOrdered();
                     }
                 });
-            }
-            Log.e("OrderedFoodReceivedmsg",dishType+"");
+
+            Log.e("OrderedFoodmsg",dishType+"");
+        }, Integer.class);
+
+        hubDrinkReady.on("ConfirmDrinkReady", (msg)->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    foodOrderItemArrayList.clear();
+                    responseList.clear();
+                    API_GetListDrinkOrdered();
+                }
+            });
+
+            Log.e("DrinkReceivedmsg",msg+"");
         }, Integer.class);
 
 
@@ -115,6 +133,11 @@ public class KitchenDrink extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
+                    try{
+                        hubDrinkReady.send("ConfirmDrinkReady",0);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                     /////
                 } else {
                     Toast.makeText(KitchenDrink.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
@@ -127,6 +150,7 @@ public class KitchenDrink extends AppCompatActivity {
                 Log.e("PutDishReady failed: ", t.toString());
             }
         });
+        new HubConnectionTask().execute(hubDrinkReady);
     }
 
     private void API_GetListDrinkOrdered() {
@@ -155,5 +179,19 @@ public class KitchenDrink extends AppCompatActivity {
                 Log.e("failure: ", t.toString());
             }
         });
+    }
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
     }
 }

@@ -17,6 +17,8 @@ import com.example.myapplication.api.ApiClient;
 import com.example.myapplication.api.ApiInterface;
 import com.example.myapplication.models.CountByDishNameItem;
 import com.example.myapplication.models.CountByUserItem;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +34,7 @@ public class CountByUserName extends AppCompatActivity {
     ArrayList<CountByUserItem> arrayList;
     ArrayList<CountByUserItem> responseList;
     CountByUserItemAdapter adapter;
+    HubConnection hubConnection;
 
 
     @Override
@@ -41,12 +44,25 @@ public class CountByUserName extends AppCompatActivity {
         backBtn = findViewById(R.id.count_by_user_backtohome_btn);
         listView = findViewById(R.id.listview_count_by_user);
         okBtn = findViewById(R.id.cbu_btn_ok);
+        hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"confirmPaymentHub").build();
+        hubConnection.start();
         arrayList = new ArrayList<>();
         adapter = new CountByUserItemAdapter(this, R.layout.item_count_by_user, arrayList);
         listView.setAdapter(adapter);
 
         //add data
         API_GetCountByDishName();
+
+        hubConnection.on("ConfirmPayment", (msg)->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    arrayList.clear();
+                    responseList.clear();
+                    API_GetCountByDishName();
+                }
+            });
+        }, Integer.class);
 
         okBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,7 +108,7 @@ public class CountByUserName extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<CountByUserItem>> call, Throwable t) {
-                Log.e("get count by user failed: ", t.toString());
+                Log.e("get count failed: ", t.toString());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -1,6 +1,7 @@
 package com.example.myapplication.activities;
 
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class KitchenFood extends AppCompatActivity {
     KitchenFoodItemAdapter adapter;
     AlertDialog dialog;
     AlertDialog.Builder builder;
-    HubConnection hubConnection;
+    HubConnection hubConnection, hubFoodReady;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +48,9 @@ public class KitchenFood extends AppCompatActivity {
         kitchenOrderedFoodListView = findViewById(R.id.ordered_food_listview);
         backToMain = findViewById(R.id.img_back_btn_from_kitchen_ordered);
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        hubFoodReady = HubConnectionBuilder.create(ApiClient.BASE_URL + "foodReadyHub").build();
         hubConnection.start();
+        hubFoodReady.start();
 
 
         // click to back to main activity
@@ -69,35 +72,39 @@ public class KitchenFood extends AppCompatActivity {
         kitchenOrderedFoodListView.setAdapter(adapter);
 
         // nhận signalr confirm ordered food
-        hubConnection.on("OrderedFoodReceived", (dishType) ->{
-            if(dishType == 1){
+        hubConnection.on("ConfirmOrderedFood", (msg) ->{
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        foodOrderItemArrayList.clear();
+                        responseList.clear();
                         API_GetListOrdered();
                     }
                 });
-            }
-            Log.e("OrderedFoodReceivedmsg",dishType+"");
+
+            Log.e("OrderedFoodReceivedmsg",msg+"");
         }, Integer.class);
 
+        hubFoodReady.on("ConfirmFoodReady", (msg) ->{
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    foodOrderItemArrayList.clear();
+                    responseList.clear();
+                    API_GetListOrdered();
+                }
+            });
 
-
-
-        ///
-
+            Log.e("ReadyFoodmsg",msg+"");
+        }, Integer.class);
 
 
         kitchenOrderedFoodListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                    ShowDialog(position);
-
             }
         });
-
-
-
 
     }
 
@@ -127,6 +134,12 @@ public class KitchenFood extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
+                    try{
+                        hubFoodReady.send("ConfirmFoodReady",0);
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                     /////
                 } else {
                     Toast.makeText(KitchenFood.this, "Có lỗi xảy ra.", Toast.LENGTH_LONG).show();
@@ -139,6 +152,7 @@ public class KitchenFood extends AppCompatActivity {
                 Log.e("PutDishReady failed: ", t.toString());
             }
         });
+        new HubConnectionTask().execute(hubFoodReady);
     }
 
 
@@ -169,5 +183,19 @@ public class KitchenFood extends AppCompatActivity {
                 Log.e("failure: ", t.toString());
             }
         });
+    }
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
     }
 }
