@@ -1,5 +1,6 @@
 package com.example.myapplication.fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +13,7 @@ import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
@@ -54,32 +56,28 @@ public class FragmentMenuFood extends Fragment {
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
 
         hubConnection.start();
-        //call api get list of dishes
-        //
-        ApiClient.getApiClient().create(ApiInterface.class).getListDishes().enqueue(new Callback<List<MenuFoodItem>>() {
-            @Override
-            public void onResponse(Call<List<MenuFoodItem>> call, Response<List<MenuFoodItem>> response) {
-                responseList = (ArrayList<MenuFoodItem>) response.body();
-                for (MenuFoodItem i:responseList){
-                    /// thêm tất cả các món từ response vào menuItemArrayList
-                    menuItemArrayList.add(new MenuFoodItem(i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+        hubConnection.on("ReceiveNewFood", (msg) ->{
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    menuItemArrayList.clear();
+                    responseList.clear();
+                    API_GetFood();
                 }
-                Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
-                Log.e("Get list dishes status:", "Success");
-                menuFoodItemAdapter.notifyDataSetChanged();
-            }
+            });
 
-            @Override
-            public void onFailure(Call<List<MenuFoodItem>> call, Throwable t) {
-                Log.e("Get list dishes status:", "Failed"+ t);
-            }
-        });
-
-
-
-        //
+            Log.e("ReceiveNewFoodmsgInMenu", String.valueOf(msg));
+        }, Integer.class);
         menuFoodItemAdapter =  new MenuFoodItemAdapter(getContext(),R.layout.item_menu_food, menuItemArrayList);
         listViewFood.setAdapter(menuFoodItemAdapter);
+        //call api get list of dishes
+        //
+        API_GetFood();
+
+
+
+
+        //
+
 
         listViewFood.setTextFilterEnabled(true);
 
@@ -103,20 +101,30 @@ public class FragmentMenuFood extends Fragment {
             }
         });
         menuFoodItemAdapter.notifyDataSetChanged();
-        hubConnection.on("ReceiveNewFood", (foodName, foodPrice, dishType) ->{
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    receivedItem = new MenuFoodItem(0,foodName,foodPrice, dishType, ApiClient.BASE_URL+"Image/logo_smart_meal.png");
-                    menuItemArrayList.add(receivedItem);
-                    Collections.sort(menuItemArrayList, Comparator.comparing(MenuFoodItem::getDishName));
-                    menuFoodItemAdapter.notifyDataSetChanged();
-                }
-            });
 
-            Log.e("ReceiveNewFoodmsgInMenu",foodName + foodPrice+""+ dishType+"");
-        }, String.class, Integer.class, Integer.class);
         return rootView;
+    }
+
+    private void API_GetFood() {
+        ApiClient.getApiClient().create(ApiInterface.class).getListDishes().enqueue(new Callback<List<MenuFoodItem>>() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void onResponse(Call<List<MenuFoodItem>> call, Response<List<MenuFoodItem>> response) {
+                responseList = (ArrayList<MenuFoodItem>) response.body();
+                for (MenuFoodItem i:responseList){
+                    /// thêm tất cả các món từ response vào menuItemArrayList
+                    menuItemArrayList.add(new MenuFoodItem(i.getDishId(),i.getDishName(), i.getPrice(),i.getDishTypeId(), ApiClient.BASE_URL +"Image/" + i.getImage()));
+                }
+                Collections.sort(menuItemArrayList);
+                Log.e("Get list dishes status:", "Success");
+                menuFoodItemAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onFailure(Call<List<MenuFoodItem>> call, Throwable t) {
+                Log.e("Get list dishes status:", "Failed"+ t);
+            }
+        });
     }
 
 

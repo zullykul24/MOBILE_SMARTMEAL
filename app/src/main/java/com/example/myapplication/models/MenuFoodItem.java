@@ -1,8 +1,10 @@
 package com.example.myapplication.models;
 
+import com.example.myapplication.VNCharacterUtils;
+
 import java.io.Serializable;
 
-public class MenuFoodItem implements Serializable {
+public class MenuFoodItem implements Serializable, Comparable<MenuFoodItem> {
     private int dishId;
     private String dishName;
     private int dishTypeId;
@@ -76,4 +78,9 @@ public class MenuFoodItem implements Serializable {
     }
 
 
+    @Override
+    public int compareTo(MenuFoodItem o) {
+        return VNCharacterUtils.removeAccent(this.dishName.toLowerCase())
+                .compareTo(VNCharacterUtils.removeAccent(o.getDishName().toLowerCase()));
+    }
 }

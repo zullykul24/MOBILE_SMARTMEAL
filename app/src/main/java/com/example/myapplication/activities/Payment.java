@@ -129,7 +129,7 @@ public class Payment extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<CreateOrder>> call, Throwable t) {
                 Toast.makeText(Payment.this, "Lấy danh sách bàn thất bại.", Toast.LENGTH_LONG).show();
-                Log.e("get payment tables failed: ", t.toString());
+                Log.e("get payment failed: ", t.toString());
             }
         });
     }

@@ -48,6 +48,7 @@ public class AddFood extends AppCompatActivity {
     ImageButton camera, folder;
     int RE_CAMERA = 123;
     int RE_FOLDER = 456;
+    int addNewFood = 0;
     private int dishType = 0;
     RadioButton type_food, type_drink;
     RadioGroup radioGroup;
@@ -60,6 +61,7 @@ public class AddFood extends AppCompatActivity {
         setContentView(R.layout.activity_add_food);
         AnhXa();
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"addFoodHub").build();
+        hubConnection.start();
 
         // bat cam
         camera.setOnClickListener(new View.OnClickListener() {
@@ -145,20 +147,19 @@ public class AddFood extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.e("Add food response", response+"");
                 if(response.code() == 200) {
-                    Toast.makeText(AddFood.this, "Món đã được thêm", Toast.LENGTH_SHORT).show();
-                    //if (hubConnection == null || hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED) {
-                    //    hubConnection.start().blockingAwait();
-                    //}
-                    //Log.e("status", hubConnection.getConnectionState()+"");
+                    addNewFood = 1;
+                    Toast.makeText(AddFood.this, "Thêm món thành công", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
+
+                }
+                if(addNewFood == 1){
                     try{
                         hubConnection.send("SendNewFood", 1);
                     } catch (Exception e){
                         e.printStackTrace();
                     }
-                    finish();
-                }
-                else {
-                    Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
                     finish();
                 }
             }
@@ -167,7 +168,7 @@ public class AddFood extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e("Add food failed", t+"");
                 Toast.makeText(AddFood.this, "Đã có lỗi xảy ra", Toast.LENGTH_SHORT).show();
-                finish();
+
 
             }
         });

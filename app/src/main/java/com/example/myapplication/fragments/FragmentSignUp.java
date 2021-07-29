@@ -160,7 +160,7 @@ public class FragmentSignUp extends Fragment {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             if(response.code() == 200){
-                                Toast.makeText(getContext(), "ok", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getContext(), "Đăng ký tài khoản thành công", Toast.LENGTH_LONG).show();
                                 Intent intent = new Intent(getContext(), LoginActivity.class);
                                 startActivity(intent);
 

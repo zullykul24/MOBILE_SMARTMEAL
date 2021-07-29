@@ -67,8 +67,8 @@ public class FragmentHomePageManager extends Fragment {
         Glide.with(this).load(R.drawable.history).circleCrop().into(historyBtn);
         Glide.with(this).load(R.drawable.food_menu).circleCrop().into(menuFoodBtn);
         Glide.with(this).load(R.drawable.payment).circleCrop().into(paymentBtn);
-        Glide.with(this).load(R.drawable.ordered_food).into(kitchenFoodBtn);
-        Glide.with(this).load(R.drawable.statistics).into(dishCountingBtn);
+        Glide.with(this).load(R.drawable.ordered_food).circleCrop().into(kitchenFoodBtn);
+        Glide.with(this).load(R.drawable.statistics).circleCrop().into(dishCountingBtn);
 
 
         // for waiter

@@ -249,7 +249,7 @@ public class Order extends AppCompatActivity {
                 listViewFood.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
-                        Toast.makeText(getApplicationContext(),arrayFood.get(position).getDishName(),Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(getApplicationContext(),arrayFood.get(position).getDishName(),Toast.LENGTH_SHORT).show();
                         if(arrayFood.get(position).getIsBooked() == 1) {
                             return false;
                         }

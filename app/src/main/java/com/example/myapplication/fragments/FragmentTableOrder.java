@@ -1,6 +1,7 @@
 package com.example.myapplication.fragments;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -48,10 +49,12 @@ public class FragmentTableOrder extends Fragment {
     TextView tableTitle;
     GridView gridViewTable;
     TableItemAdapter tableItemAdapter;
-    HubConnection hubConnection;
+    HubConnection hubConnection, hubChangeState;
     private String COLOR_FILLED;
     private String COLOR_BOOKED;
     private String COLOR_EMPTY;
+    int setBooked = 0;
+    int setEmpty = 0;
     private ArrayList<Table> responseList;
     ArrayList<Table> tableArrayList;
     public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
@@ -92,6 +95,8 @@ public class FragmentTableOrder extends Fragment {
         COLOR_BOOKED = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorBookedTable));
         COLOR_EMPTY = "#"+Integer.toHexString(ContextCompat.getColor(getActivity(), R.color.colorEmptyTable));
         hubConnection = HubConnectionBuilder.create(ApiClient.BASE_URL +"orderFoodHub").build();
+        hubChangeState = HubConnectionBuilder.create(ApiClient.BASE_URL +"changeTableStateHub").build();
+        hubChangeState.start();
         hubConnection.start();
         Account account = DataLocalManager.getLoggedinAccount();
         gridViewTable = (GridView) rootView.findViewById(R.id.gridViewTable);
@@ -100,6 +105,23 @@ public class FragmentTableOrder extends Fragment {
         API_GetListTables();
         tableItemAdapter.notifyDataSetChanged();
         /////
+
+        hubChangeState.on("ReceiveTableState", (tableId, tag)->{
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(tag == 0){
+                        tableArrayList.get(tableId-1).setStatus(0);
+                        tableArrayList.get(tableId-1).setColor(COLOR_EMPTY);
+                        tableItemAdapter.notifyDataSetChanged();
+                    } else {
+                        tableArrayList.get(tableId-1).setStatus(-1);
+                        tableArrayList.get(tableId-1).setColor(COLOR_BOOKED);
+                        tableItemAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
+                },Integer.class, Integer.class);
         hubConnection.on("ConfirmOrderedFood", (tableId) ->{
             getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -174,10 +196,18 @@ public class FragmentTableOrder extends Fragment {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.code() == 200){
-                    hubConnection.send("ChangeTableState",info.position, 0);
+                    setEmpty = 1;
+
                     Toast.makeText(getContext(), "Bàn trống thành công", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+                if(setEmpty == 1){
+                    try {
+                        hubChangeState.send("ChangeTableState", info.position+1,0);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -194,10 +224,18 @@ public class FragmentTableOrder extends Fragment {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.e("rspcode", response.code()+"");
                 if(response.code() == 200){
-                    hubConnection.send("ChangeTableState",info.position, -1);
+                    setBooked = 1;
+
                     Toast.makeText(getContext(), "Đặt trước thành công", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getContext(), "Đã có lỗi xảy ra. Vui lòng thử lại.", Toast.LENGTH_SHORT).show();
+                }
+                if(setBooked == 1){
+                    try {
+                        hubChangeState.send("ChangeTableState", info.position+1,-1);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -219,4 +257,20 @@ public class FragmentTableOrder extends Fragment {
                     }
                 }
             });
+
+    class HubConnectionTask extends AsyncTask<HubConnection, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(HubConnection... hubConnections) {
+            HubConnection hubConnection1 = hubConnections[0];
+            hubConnection1.start().blockingAwait();
+            return null;
+        }
+    }
 }
+
